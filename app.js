@@ -19,8 +19,8 @@ const levelMessages = {
   1: "가볍게 하나 먹었어요.",
   2: "간식 타임이 즐거웠네요.",
   3: "오늘은 꽤 먹었네요.",
-  4: "조금 천천히 가볼까요?",
-  5: "내일은 가볍게 시작해봐요.",
+  4: "이제 그만 먹어도 되지 않을까요?",
+  5: "내일은 오늘보다 적게 먹는 게 나을 것 같네요.",
 };
 
 const characterPalettes = {
@@ -34,6 +34,30 @@ const characterLabels = {
   hamster: "햄스터",
   dog: "강아지",
 };
+
+const CAT_IMAGE_LEVEL_THRESHOLDS = [
+  { minCount: 0, level: 1 },
+  { minCount: 2, level: 2 },
+  { minCount: 4, level: 3 },
+  { minCount: 6, level: 4 },
+  { minCount: 8, level: 5 },
+];
+
+const HAMSTER_IMAGE_LEVEL_THRESHOLDS = [
+  { minCount: 0, level: 1 },
+  { minCount: 2, level: 2 },
+  { minCount: 4, level: 3 },
+  { minCount: 6, level: 4 },
+  { minCount: 8, level: 5 },
+];
+
+const POODLE_IMAGE_LEVEL_THRESHOLDS = [
+  { minCount: 0, level: 1 },
+  { minCount: 2, level: 2 },
+  { minCount: 4, level: 3 },
+  { minCount: 6, level: 4 },
+  { minCount: 8, level: 5 },
+];
 
 const mainView = document.getElementById("mainView");
 const historyView = document.getElementById("historyView");
@@ -251,19 +275,27 @@ function renderMain() {
   const goalMessage =
     count <= state.settings.dailyGoal
       ? `목표(${state.settings.dailyGoal}회) 안에서 기록 중이에요.`
-      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 내일 다시 가볍게 시작해요.`;
+      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 내일은 적당히 먹어요! 살쪄요!!!`;
 
   todayLabel.textContent = `${getKSTDateLabel()} · ${characterLabels[type]}`;
   countLabel.textContent = `${count}회`;
-  snackMessage.textContent = `${levelMessages[level]} ${goalMessage}`;
+  snackMessage.textContent = `${levelMessages[level]}\n${goalMessage}`;
   characterImage.src = buildCharacterSvgDataUri(count, type);
-  applyCharacterMotion(characterImage, count, type);
   characterImage.alt = `${characterLabels[type]} 캐릭터`;
   decreaseBtn.disabled = count === 0;
 }
 
 function buildCharacterSvgDataUri(count, rawType) {
   const type = sanitizeCharacterType(rawType);
+  if (type === "cat") {
+    return getCatImagePathByCount(count);
+  }
+  if (type === "hamster") {
+    return getHamsterImagePathByCount(count);
+  }
+  if (type === "dog") {
+    return getPoodleImagePathByCount(count);
+  }
   const palette = characterPalettes[type];
   const level = getCharacterLevel(count);
   const { baseLevel, nextLevel, ratio } = getGrowthStage(count);
@@ -281,7 +313,6 @@ function buildCharacterSvgDataUri(count, rawType) {
   const bellyRx = 30 + bodyMorph.bellyScale * 16;
   const bellyRy = 24 + bodyMorph.bellyScale * 14;
   const background = type === "dog" ? "#f4eee8" : type === "hamster" ? "#fff2df" : "#fff3e8";
-  const motion = getMotionProfile(count, type);
   const expression = getExpressionByCount(count, headY);
 
   const typeFragments = {
@@ -292,7 +323,6 @@ function buildCharacterSvgDataUri(count, rawType) {
           <path d="M205 108 L226 55 L248 105 Z" fill="${furDark}" />
           <path d="M122 102 L134 73 L147 104 Z" fill="#ffd8cb" />
           <path d="M214 104 L226 73 L238 102 Z" fill="#ffd8cb" />
-          <animateTransform attributeName="transform" type="rotate" values="-1 180 ${headY};1 180 ${headY};-1 180 ${headY}" dur="${motion.ear}s" repeatCount="indefinite"/>
         </g>
       `,
       muzzle: `<ellipse cx="180" cy="${headY + 14}" rx="28" ry="20" fill="#f8e7dd" />`,
@@ -307,7 +337,6 @@ function buildCharacterSvgDataUri(count, rawType) {
           <circle cx="234" cy="88" r="20" fill="${furDark}" />
           <circle cx="126" cy="88" r="11" fill="#ffd6c0" />
           <circle cx="234" cy="88" r="11" fill="#ffd6c0" />
-          <animateTransform attributeName="transform" type="translate" values="0 0;0 -1;0 0" dur="${motion.ear}s" repeatCount="indefinite"/>
         </g>
       `,
       muzzle: `<ellipse cx="180" cy="${headY + 16}" rx="34" ry="24" fill="#f7e5d2" />`,
@@ -323,7 +352,6 @@ function buildCharacterSvgDataUri(count, rawType) {
         <g>
           <ellipse cx="118" cy="${headY + 10}" rx="18" ry="34" fill="${furDark}" />
           <ellipse cx="242" cy="${headY + 10}" rx="18" ry="34" fill="${furDark}" />
-          <animateTransform attributeName="transform" type="rotate" values="-1 180 ${headY};1 180 ${headY};-1 180 ${headY}" dur="${motion.ear}s" repeatCount="indefinite"/>
         </g>
       `,
       muzzle: `<ellipse cx="180" cy="${headY + 20}" rx="32" ry="20" fill="#f6e4d6" />`,
@@ -346,10 +374,8 @@ function buildCharacterSvgDataUri(count, rawType) {
   <ellipse cx="180" cy="324" rx="90" ry="18" fill="#00000018"/>
   <g>
     ${typeFragments[type].tail}
-    <animateTransform attributeName="transform" type="rotate" values="-5 180 ${bodyY + 18};7 180 ${bodyY + 18};-5 180 ${bodyY + 18}" dur="${motion.tail}s" repeatCount="indefinite"/>
   </g>
   <g>
-    <animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" dur="${motion.body}s" repeatCount="indefinite"/>
     <ellipse cx="139" cy="${bodyY + bodyRy - 12}" rx="${14 + bodyMorph.pawScale}" ry="${10 + bodyMorph.pawScale}" fill="${furDark}" />
     <ellipse cx="221" cy="${bodyY + bodyRy - 12}" rx="${14 + bodyMorph.pawScale}" ry="${10 + bodyMorph.pawScale}" fill="${furDark}" />
   ${selected.ears}
@@ -369,6 +395,35 @@ function buildCharacterSvgDataUri(count, rawType) {
 </svg>`;
 
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function getHamsterImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, HAMSTER_IMAGE_LEVEL_THRESHOLDS);
+  return `characters/hamsters/hamster_lv${imageLevel}.svg`;
+}
+
+function getCatImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, CAT_IMAGE_LEVEL_THRESHOLDS);
+  return `characters/cats/cat_lv${imageLevel}.svg`;
+}
+
+function getPoodleImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, POODLE_IMAGE_LEVEL_THRESHOLDS);
+  return `characters/puddles/poodle_lv${imageLevel}.svg`;
+}
+
+function getImageLevelByThresholds(count, thresholds) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  const safeThresholds = Array.isArray(thresholds) ? thresholds : [];
+
+  for (let i = safeThresholds.length - 1; i >= 0; i -= 1) {
+    const rule = safeThresholds[i];
+    if (safeCount >= rule.minCount) {
+      return clampNumber(rule.level, 1, 5);
+    }
+  }
+
+  return 1;
 }
 
 function shadeColor(hex, percent) {
@@ -486,25 +541,6 @@ function getExpressionByCount(count, headY) {
   };
 }
 
-function getMotionProfile(count, type) {
-  const safe = Math.max(0, Number(count) || 0);
-  const energy = clampNumber(safe / 12, 0, 1);
-  const typeFactor = type === "dog" ? 0.2 : type === "cat" ? 0.08 : 0;
-  return {
-    body: (3.2 - energy * 1.1).toFixed(2),
-    tail: (1.9 - energy * 0.7 - typeFactor).toFixed(2),
-    ear: (2.6 - energy * 0.6).toFixed(2),
-    float: (4.0 - energy * 1.1).toFixed(2),
-    tilt: `${3 + energy * 2.2}deg`,
-  };
-}
-
-function applyCharacterMotion(target, count, type) {
-  const motion = getMotionProfile(count, type);
-  target.style.setProperty("--float-duration", `${motion.float}s`);
-  target.style.setProperty("--tilt-amount", motion.tilt);
-}
-
 function getRecentDaysData(days) {
   const result = [];
   for (let i = days - 1; i >= 0; i -= 1) {
@@ -565,5 +601,4 @@ function updateSettingsCharacterPreview(type) {
   const safeType = sanitizeCharacterType(type);
   const currentCount = getTodayCount();
   settingsCharacterPreview.src = buildCharacterSvgDataUri(currentCount, safeType);
-  applyCharacterMotion(settingsCharacterPreview, currentCount, safeType);
 }
