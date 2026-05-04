@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snack Buddy</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="mainView" class="view view-active" aria-label="메인 화면">
+        <header class="app-header">
+          <h1>Snack Buddy</h1>
+          <p id="todayLabel" class="subtle"></p>
+        </header>
+
+        <article class="character-card">
+          <img
+            id="characterImage"
+            src="./characters/character_0.svg"
+            alt="간식 캐릭터 상태"
+            width="220"
+            height="220"
+          />
+          <p id="snackMessage" class="snack-message"></p>
+        </article>
+
+        <section class="counter-card">
+          <p class="counter-title">오늘의 간식 횟수</p>
+          <p id="countLabel" class="count-value">0회</p>
+          <div class="button-row">
+            <button id="increaseBtn" class="primary">+ 간식 먹음</button>
+            <button id="decreaseBtn" class="secondary">- 1회 취소</button>
+          </div>
+          <button id="resetBtn" class="danger">오늘 기록 초기화</button>
+        </section>
+
+        <div class="quick-nav">
+          <button id="goHistoryBtn" class="link-btn">히스토리 보기</button>
+          <button id="goSettingsBtn" class="link-btn">설정 보기</button>
+        </div>
+      </section>
+
+      <section id="historyView" class="view" aria-label="히스토리 화면">
+        <header class="history-header">
+          <button id="backBtn" class="ghost">← 뒤로가기</button>
+          <h2>히스토리</h2>
+        </header>
+
+        <nav class="period-nav" aria-label="조회 기간 선택">
+          <button data-days="7" class="period-btn period-active">최근 7일</button>
+          <button data-days="14" class="period-btn">최근 14일</button>
+          <button data-days="30" class="period-btn">최근 30일</button>
+        </nav>
+
+        <section class="chart-card">
+          <div id="historyChart" class="bar-chart" aria-label="일별 간식 횟수 그래프"></div>
+        </section>
+
+        <section class="summary-grid">
+          <article class="summary-card">
+            <p class="summary-title">총 간식 횟수</p>
+            <p id="totalCount">0회</p>
+          </article>
+          <article class="summary-card">
+            <p class="summary-title">일평균 간식 횟수</p>
+            <p id="avgCount">0.0회</p>
+          </article>
+          <article class="summary-card">
+            <p class="summary-title">가장 많이 먹은 날</p>
+            <p id="maxDay">-</p>
+          </article>
+          <article class="summary-card">
+            <p class="summary-title">가장 적게 먹은 날</p>
+            <p id="minDay">-</p>
+          </article>
+        </section>
+      </section>
+
+      <section id="settingsView" class="view" aria-label="설정 화면">
+        <header class="history-header">
+          <button id="backFromSettingsBtn" class="ghost">← 뒤로가기</button>
+          <h2>설정</h2>
+        </header>
+
+        <section class="counter-card">
+          <p class="field-label">캐릭터 미리보기</p>
+          <img
+            id="settingsCharacterPreview"
+            src=""
+            alt="설정 캐릭터 미리보기"
+            width="180"
+            height="180"
+          />
+
+          <label class="field-label" for="dailyGoalInput">하루 목표 횟수</label>
+          <input id="dailyGoalInput" type="number" min="0" max="20" />
+
+          <label class="field-label" for="characterTypeSelect">캐릭터 타입</label>
+          <select id="characterTypeSelect">
+            <option value="cat">고양이</option>
+            <option value="hamster">햄스터</option>
+            <option value="dog">강아지</option>
+          </select>
+
+          <label class="field-label" for="themeSelect">테마</label>
+          <select id="themeSelect">
+            <option value="light">라이트</option>
+            <option value="dark">다크</option>
+          </select>
+
+          <button id="saveSettingsBtn" class="primary">설정 저장</button>
+          <button id="clearAllBtn" class="danger">전체 기록 초기화</button>
+          <p id="settingsStatus" class="subtle"></p>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

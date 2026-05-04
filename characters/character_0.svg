@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="0� �� ��0">
+  <rect width="220" height="220" rx="28" fill="#fff6ea"/>
+  <circle cx="110" cy="110" r="62" fill="#f7d8b5"/>
+  <circle cx="86" cy="95" r="7" fill="#4d3829"/>
+  <circle cx="134" cy="95" r="7" fill="#4d3829"/>
+  <path d="M88 132 Q110 122 132 132" stroke="#4d3829" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <text x="110" y="197" text-anchor="middle" font-size="16" fill="#8a6447">LV.0</text>
+</svg>

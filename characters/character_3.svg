@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="3�� ��0">
+  <rect width="220" height="220" rx="28" fill="#ffedd4"/>
+  <ellipse cx="110" cy="118" rx="72" ry="70" fill="#f4c188"/>
+  <circle cx="86" cy="92" r="7" fill="#4d3829"/>
+  <circle cx="134" cy="92" r="7" fill="#4d3829"/>
+  <path d="M82 128 Q110 155 138 128" stroke="#4d3829" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="110" cy="145" rx="26" ry="16" fill="#efb178"/>
+  <text x="110" y="197" text-anchor="middle" font-size="16" fill="#8a6447">LV.3</text>
+</svg>

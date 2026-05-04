@@ -1,0 +1,569 @@
+const HISTORY_KEY = "snack_history";
+const SETTINGS_KEY = "snack_settings";
+const PERIOD_DEFAULT = 7;
+const CHARACTER_TYPES = ["cat", "hamster", "dog"];
+const DEFAULT_SETTINGS = {
+  dailyGoal: 2,
+  characterType: "cat",
+  theme: "light",
+};
+
+const state = {
+  period: PERIOD_DEFAULT,
+  history: loadSnackHistory(),
+  settings: loadSnackSettings(),
+};
+
+const levelMessages = {
+  0: "오늘은 아직 간식 전이에요.",
+  1: "가볍게 하나 먹었어요.",
+  2: "간식 타임이 즐거웠네요.",
+  3: "오늘은 꽤 먹었네요.",
+  4: "조금 천천히 가볼까요?",
+  5: "내일은 가볍게 시작해봐요.",
+};
+
+const characterPalettes = {
+  cat: ["#f6d9bc", "#f4d1b2", "#f3c8a6", "#efbd97", "#e8af87", "#df9f76"],
+  hamster: ["#f0cf9e", "#ecc692", "#e8ba84", "#e2ac76", "#d79e69", "#ca905a"],
+  dog: ["#d7bfaa", "#ceb49e", "#c4a992", "#bb9d84", "#ad8f75", "#9e8066"],
+};
+
+const characterLabels = {
+  cat: "고양이",
+  hamster: "햄스터",
+  dog: "강아지",
+};
+
+const mainView = document.getElementById("mainView");
+const historyView = document.getElementById("historyView");
+const settingsView = document.getElementById("settingsView");
+const historyChart = document.getElementById("historyChart");
+
+const todayLabel = document.getElementById("todayLabel");
+const countLabel = document.getElementById("countLabel");
+const snackMessage = document.getElementById("snackMessage");
+const characterImage = document.getElementById("characterImage");
+const decreaseBtn = document.getElementById("decreaseBtn");
+
+const totalCount = document.getElementById("totalCount");
+const avgCount = document.getElementById("avgCount");
+const maxDay = document.getElementById("maxDay");
+const minDay = document.getElementById("minDay");
+
+const dailyGoalInput = document.getElementById("dailyGoalInput");
+const characterTypeSelect = document.getElementById("characterTypeSelect");
+const themeSelect = document.getElementById("themeSelect");
+const settingsStatus = document.getElementById("settingsStatus");
+const settingsCharacterPreview = document.getElementById("settingsCharacterPreview");
+
+const periodButtons = Array.from(document.querySelectorAll(".period-btn"));
+
+bindEvents();
+applyTheme();
+renderMain();
+
+function bindEvents() {
+  document.getElementById("increaseBtn").addEventListener("click", () => updateTodayCount(1));
+  document.getElementById("decreaseBtn").addEventListener("click", () => updateTodayCount(-1));
+  document.getElementById("resetBtn").addEventListener("click", resetTodayCount);
+
+  document.getElementById("goHistoryBtn").addEventListener("click", () => {
+    setActiveView("history");
+    renderHistory();
+  });
+  document.getElementById("goSettingsBtn").addEventListener("click", () => {
+    setActiveView("settings");
+    renderSettings();
+  });
+  document.getElementById("backBtn").addEventListener("click", () => {
+    setActiveView("main");
+    renderMain();
+  });
+  document.getElementById("backFromSettingsBtn").addEventListener("click", () => {
+    setActiveView("main");
+    renderMain();
+  });
+
+  periodButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.period = Number(button.dataset.days);
+      periodButtons.forEach((btn) => btn.classList.remove("period-active"));
+      button.classList.add("period-active");
+      renderHistory();
+    });
+  });
+
+  document.getElementById("saveSettingsBtn").addEventListener("click", saveSettingsFromForm);
+  document.getElementById("clearAllBtn").addEventListener("click", clearAllHistory);
+  characterTypeSelect.addEventListener("change", () => {
+    updateSettingsCharacterPreview(characterTypeSelect.value);
+  });
+}
+
+function saveSettingsFromForm() {
+  state.settings = {
+    dailyGoal: clampNumber(Number(dailyGoalInput.value || 0), 0, 20),
+    characterType: sanitizeCharacterType(characterTypeSelect.value),
+    theme: themeSelect.value === "dark" ? "dark" : "light",
+  };
+
+  saveSnackSettings();
+  applyTheme();
+  renderMain();
+  settingsStatus.textContent = "설정을 저장했어요.";
+}
+
+function clearAllHistory() {
+  if (!window.confirm("모든 날짜의 간식 기록을 삭제할까요?")) {
+    return;
+  }
+  state.history = {};
+  saveSnackHistory();
+  renderMain();
+  renderHistory();
+  settingsStatus.textContent = "전체 기록을 초기화했어요.";
+}
+
+function setActiveView(name) {
+  [mainView, historyView, settingsView].forEach((view) => view.classList.remove("view-active"));
+  if (name === "history") {
+    historyView.classList.add("view-active");
+  } else if (name === "settings") {
+    settingsView.classList.add("view-active");
+  } else {
+    mainView.classList.add("view-active");
+  }
+}
+
+function resetTodayCount() {
+  if (!window.confirm("오늘 기록을 0으로 초기화할까요?")) {
+    return;
+  }
+  state.history[getKSTDateKey()] = 0;
+  persistAndRender();
+}
+
+function clampNumber(value, min, max) {
+  if (!Number.isFinite(value)) {
+    return min;
+  }
+  return Math.max(min, Math.min(max, value));
+}
+
+function sanitizeCharacterType(type) {
+  return CHARACTER_TYPES.includes(type) ? type : DEFAULT_SETTINGS.characterType;
+}
+
+function getKSTDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const y = parts.find((p) => p.type === "year")?.value;
+  const m = parts.find((p) => p.type === "month")?.value;
+  const d = parts.find((p) => p.type === "day")?.value;
+  return `${y}-${m}-${d}`;
+}
+
+function getKSTDateLabel(date = new Date()) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+    timeZone: "Asia/Seoul",
+  }).format(date);
+}
+
+function getCharacterLevel(count) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  if (safeCount === 0) return 0;
+  if (safeCount === 1) return 1;
+  if (safeCount === 2) return 2;
+  if (safeCount === 3) return 3;
+  if (safeCount === 4) return 4;
+  return 5;
+}
+
+function loadSnackHistory() {
+  const raw = localStorage.getItem(HISTORY_KEY);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return typeof parsed === "object" && parsed ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveSnackHistory() {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history));
+}
+
+function loadSnackSettings() {
+  const raw = localStorage.getItem(SETTINGS_KEY);
+  if (!raw) return { ...DEFAULT_SETTINGS };
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      dailyGoal: clampNumber(Number(parsed.dailyGoal), 0, 20),
+      characterType: sanitizeCharacterType(parsed.characterType),
+      theme: parsed.theme === "dark" ? "dark" : "light",
+    };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+function saveSnackSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute("data-theme", state.settings.theme);
+}
+
+function getTodayCount() {
+  return Number(state.history[getKSTDateKey()] || 0);
+}
+
+function updateTodayCount(delta) {
+  const today = getKSTDateKey();
+  state.history[today] = Math.max(0, Number(state.history[today] || 0) + delta);
+  persistAndRender();
+}
+
+function persistAndRender() {
+  saveSnackHistory();
+  renderMain();
+  if (historyView.classList.contains("view-active")) {
+    renderHistory();
+  }
+}
+
+function renderMain() {
+  const count = getTodayCount();
+  const level = getCharacterLevel(count);
+  const type = state.settings.characterType;
+  const goalMessage =
+    count <= state.settings.dailyGoal
+      ? `목표(${state.settings.dailyGoal}회) 안에서 기록 중이에요.`
+      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 내일 다시 가볍게 시작해요.`;
+
+  todayLabel.textContent = `${getKSTDateLabel()} · ${characterLabels[type]}`;
+  countLabel.textContent = `${count}회`;
+  snackMessage.textContent = `${levelMessages[level]} ${goalMessage}`;
+  characterImage.src = buildCharacterSvgDataUri(count, type);
+  applyCharacterMotion(characterImage, count, type);
+  characterImage.alt = `${characterLabels[type]} 캐릭터`;
+  decreaseBtn.disabled = count === 0;
+}
+
+function buildCharacterSvgDataUri(count, rawType) {
+  const type = sanitizeCharacterType(rawType);
+  const palette = characterPalettes[type];
+  const level = getCharacterLevel(count);
+  const { baseLevel, nextLevel, ratio } = getGrowthStage(count);
+  const fur = mixHexColor(palette[baseLevel], palette[nextLevel], ratio);
+  const furDark = shadeColor(fur, -16);
+  const furLight = shadeColor(fur, 20);
+  const bodyMorph = getBodyMorphByCount(count);
+  const badge = `${Math.max(0, Number(count) || 0)}회`;
+  const headRx = 56 + bodyMorph.headScale * 9;
+  const headRy = 50 + bodyMorph.headScale * 8;
+  const headY = 120 - bodyMorph.growth * 8;
+  const bodyRx = 72 + bodyMorph.bodyScaleX * 22;
+  const bodyRy = 84 + bodyMorph.bodyScaleY * 30;
+  const bodyY = 250 + bodyMorph.growth * 10;
+  const bellyRx = 30 + bodyMorph.bellyScale * 16;
+  const bellyRy = 24 + bodyMorph.bellyScale * 14;
+  const background = type === "dog" ? "#f4eee8" : type === "hamster" ? "#fff2df" : "#fff3e8";
+  const motion = getMotionProfile(count, type);
+  const expression = getExpressionByCount(count, headY);
+
+  const typeFragments = {
+    cat: {
+      ears: `
+        <g>
+          <path d="M112 105 L134 54 L156 108 Z" fill="${furDark}" />
+          <path d="M205 108 L226 55 L248 105 Z" fill="${furDark}" />
+          <path d="M122 102 L134 73 L147 104 Z" fill="#ffd8cb" />
+          <path d="M214 104 L226 73 L238 102 Z" fill="#ffd8cb" />
+          <animateTransform attributeName="transform" type="rotate" values="-1 180 ${headY};1 180 ${headY};-1 180 ${headY}" dur="${motion.ear}s" repeatCount="indefinite"/>
+        </g>
+      `,
+      muzzle: `<ellipse cx="180" cy="${headY + 14}" rx="28" ry="20" fill="#f8e7dd" />`,
+      nose: `<path d="M173 ${headY + 12} Q180 ${headY + 20} 187 ${headY + 12} Z" fill="#b66d6d" />`,
+      extras: `<path d="M118 ${headY + 11} h34 M118 ${headY + 21} h34 M208 ${headY + 11} h34 M208 ${headY + 21} h34" stroke="#6a4f3a" stroke-width="3" stroke-linecap="round"/>`,
+      tail: `<path d="M252 ${bodyY + 26} q44 18 28 47 q-10 15 -30 8" fill="none" stroke="${furDark}" stroke-width="14" stroke-linecap="round"/>`,
+    },
+    hamster: {
+      ears: `
+        <g>
+          <circle cx="126" cy="88" r="20" fill="${furDark}" />
+          <circle cx="234" cy="88" r="20" fill="${furDark}" />
+          <circle cx="126" cy="88" r="11" fill="#ffd6c0" />
+          <circle cx="234" cy="88" r="11" fill="#ffd6c0" />
+          <animateTransform attributeName="transform" type="translate" values="0 0;0 -1;0 0" dur="${motion.ear}s" repeatCount="indefinite"/>
+        </g>
+      `,
+      muzzle: `<ellipse cx="180" cy="${headY + 16}" rx="34" ry="24" fill="#f7e5d2" />`,
+      nose: `<circle cx="180" cy="${headY + 11}" r="5" fill="#a96856" />`,
+      extras: `
+        <ellipse cx="138" cy="${headY + 14}" rx="11" ry="8" fill="#f0b3a0" />
+        <ellipse cx="222" cy="${headY + 14}" rx="11" ry="8" fill="#f0b3a0" />
+      `,
+      tail: `<path d="M249 ${bodyY + 30} q28 10 14 28" fill="none" stroke="${shadeColor(furDark, 10)}" stroke-width="8" stroke-linecap="round"/>`,
+    },
+    dog: {
+      ears: `
+        <g>
+          <ellipse cx="118" cy="${headY + 10}" rx="18" ry="34" fill="${furDark}" />
+          <ellipse cx="242" cy="${headY + 10}" rx="18" ry="34" fill="${furDark}" />
+          <animateTransform attributeName="transform" type="rotate" values="-1 180 ${headY};1 180 ${headY};-1 180 ${headY}" dur="${motion.ear}s" repeatCount="indefinite"/>
+        </g>
+      `,
+      muzzle: `<ellipse cx="180" cy="${headY + 20}" rx="32" ry="20" fill="#f6e4d6" />`,
+      nose: `<ellipse cx="180" cy="${headY + 13}" rx="8" ry="6" fill="#3b2c23" />`,
+      extras: `<circle cx="158" cy="${headY + 23}" r="3" fill="#e3c1a9"/><circle cx="202" cy="${headY + 23}" r="3" fill="#e3c1a9"/>`,
+      tail: `<path d="M252 ${bodyY + 28} q46 8 26 36 q-10 14 -32 6" fill="none" stroke="${furDark}" stroke-width="12" stroke-linecap="round"/>`,
+    },
+  };
+
+  const selected = typeFragments[type];
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" shape-rendering="geometricPrecision">
+  <defs>
+    <radialGradient id="gFur" cx="40%" cy="24%">
+      <stop offset="0%" stop-color="${furLight}"/>
+      <stop offset="100%" stop-color="${fur}"/>
+    </radialGradient>
+  </defs>
+  <rect width="360" height="360" rx="40" fill="${background}"/>
+  <ellipse cx="180" cy="324" rx="90" ry="18" fill="#00000018"/>
+  <g>
+    ${typeFragments[type].tail}
+    <animateTransform attributeName="transform" type="rotate" values="-5 180 ${bodyY + 18};7 180 ${bodyY + 18};-5 180 ${bodyY + 18}" dur="${motion.tail}s" repeatCount="indefinite"/>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" dur="${motion.body}s" repeatCount="indefinite"/>
+    <ellipse cx="139" cy="${bodyY + bodyRy - 12}" rx="${14 + bodyMorph.pawScale}" ry="${10 + bodyMorph.pawScale}" fill="${furDark}" />
+    <ellipse cx="221" cy="${bodyY + bodyRy - 12}" rx="${14 + bodyMorph.pawScale}" ry="${10 + bodyMorph.pawScale}" fill="${furDark}" />
+  ${selected.ears}
+  <ellipse cx="180" cy="${bodyY}" rx="${bodyRx}" ry="${bodyRy}" fill="url(#gFur)"/>
+  <ellipse cx="180" cy="${bodyY + 10}" rx="${bellyRx}" ry="${bellyRy}" fill="${shadeColor(furLight, 10)}"/>
+  <ellipse cx="180" cy="${headY}" rx="${headRx}" ry="${headRy}" fill="url(#gFur)"/>
+  <ellipse cx="134" cy="${bodyY - 12}" rx="${13 + bodyMorph.armScale}" ry="${26 + bodyMorph.armScale}" fill="${furDark}" transform="rotate(18 134 ${bodyY - 12})"/>
+  <ellipse cx="226" cy="${bodyY - 12}" rx="${13 + bodyMorph.armScale}" ry="${26 + bodyMorph.armScale}" fill="${furDark}" transform="rotate(-18 226 ${bodyY - 12})"/>
+  ${expression.brows}
+  ${expression.eyes}
+  ${selected.muzzle}
+  ${selected.nose}
+  ${expression.mouth}
+  ${selected.extras}
+  </g>
+  <text x="180" y="338" text-anchor="middle" font-size="20" font-weight="600" fill="#7f624d">${badge}</text>
+</svg>`;
+
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function shadeColor(hex, percent) {
+  const clamped = hex.replace("#", "");
+  const num = Number.parseInt(clamped, 16);
+  const factor = percent / 100;
+  const r = clampNumber(Math.round((num >> 16) + 255 * factor), 0, 255);
+  const g = clampNumber(Math.round(((num >> 8) & 0x00ff) + 255 * factor), 0, 255);
+  const b = clampNumber(Math.round((num & 0x0000ff) + 255 * factor), 0, 255);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function mixHexColor(fromHex, toHex, ratio) {
+  const safeRatio = clampNumber(ratio, 0, 1);
+  const from = Number.parseInt(fromHex.replace("#", ""), 16);
+  const to = Number.parseInt(toHex.replace("#", ""), 16);
+  const r = Math.round((from >> 16) + (((to >> 16) - (from >> 16)) * safeRatio));
+  const g = Math.round(((from >> 8) & 0xff) + ((((to >> 8) & 0xff) - ((from >> 8) & 0xff)) * safeRatio));
+  const b = Math.round((from & 0xff) + (((to & 0xff) - (from & 0xff)) * safeRatio));
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function getGrowthStage(count) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  const raw = clampNumber((safeCount / 20) * 5, 0, 5);
+  const baseLevel = Math.floor(raw);
+  const nextLevel = Math.min(5, baseLevel + 1);
+  return { baseLevel, nextLevel, ratio: raw - baseLevel };
+}
+
+function getBodyMorphByCount(count) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  const normalized = clampNumber(safeCount / 20, 0, 1);
+  const growth = 1 - Math.pow(1 - normalized, 1.55);
+  return {
+    growth,
+    headScale: growth * 0.9,
+    bodyScaleX: growth * 1.2,
+    bodyScaleY: growth * 1.35,
+    bellyScale: growth * 1.4,
+    armScale: growth * 4.8,
+    pawScale: growth * 4.2,
+  };
+}
+
+function getExpressionByCount(count, headY) {
+  const safe = Math.max(0, Number(count) || 0);
+
+  if (safe === 0) {
+    return {
+      brows: "",
+      eyes: `
+        <ellipse cx="154" cy="${headY - 8}" rx="8.8" ry="7.8" fill="#3b2d24"/>
+        <ellipse cx="206" cy="${headY - 8}" rx="8.8" ry="7.8" fill="#3b2d24"/>
+        <circle cx="151.5" cy="${headY - 10.5}" r="1.8" fill="#ffffffaa"/>
+        <circle cx="203.5" cy="${headY - 10.5}" r="1.8" fill="#ffffffaa"/>
+      `,
+      mouth: `<path d="M166 ${headY + 24} Q180 ${headY + 32} 194 ${headY + 24}" stroke="#5d4334" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    };
+  }
+
+  if (safe <= 2) {
+    return {
+      brows: "",
+      eyes: `
+        <ellipse cx="154" cy="${headY - 8}" rx="8.6" ry="7.2" fill="#3b2d24"/>
+        <ellipse cx="206" cy="${headY - 8}" rx="8.6" ry="7.2" fill="#3b2d24"/>
+        <circle cx="151.5" cy="${headY - 10.2}" r="1.8" fill="#ffffffaa"/>
+        <circle cx="203.5" cy="${headY - 10.2}" r="1.8" fill="#ffffffaa"/>
+      `,
+      mouth: `<path d="M164 ${headY + 22} Q180 ${headY + 36} 196 ${headY + 22}" stroke="#5d4334" stroke-width="3.2" fill="none" stroke-linecap="round"/>`,
+    };
+  }
+
+  if (safe <= 4) {
+    return {
+      brows: `
+        <path d="M142 ${headY - 22} q12 -4 24 0" stroke="#654b3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M194 ${headY - 22} q12 -4 24 0" stroke="#654b3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      `,
+      eyes: `
+        <ellipse cx="154" cy="${headY - 8}" rx="8.2" ry="6.8" fill="#3b2d24"/>
+        <ellipse cx="206" cy="${headY - 8}" rx="8.2" ry="6.8" fill="#3b2d24"/>
+        <circle cx="151.8" cy="${headY - 10.2}" r="1.5" fill="#ffffffaa"/>
+        <circle cx="203.8" cy="${headY - 10.2}" r="1.5" fill="#ffffffaa"/>
+      `,
+      mouth: `<path d="M162 ${headY + 23} Q180 ${headY + 38} 198 ${headY + 23}" stroke="#5d4334" stroke-width="3.3" fill="none" stroke-linecap="round"/>`,
+    };
+  }
+
+  if (safe <= 7) {
+    return {
+      brows: `
+        <path d="M141 ${headY - 23} q13 -5 26 -1" stroke="#654b3a" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+        <path d="M193 ${headY - 24} q13 -4 26 0" stroke="#654b3a" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      `,
+      eyes: `
+        <path d="M144 ${headY - 8} q10 8 20 0" stroke="#3b2d24" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M196 ${headY - 8} q10 8 20 0" stroke="#3b2d24" stroke-width="4" fill="none" stroke-linecap="round"/>
+      `,
+      mouth: `<path d="M160 ${headY + 22} Q180 ${headY + 41} 200 ${headY + 22}" stroke="#5d4334" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
+    };
+  }
+
+  return {
+    brows: `
+      <path d="M140 ${headY - 24} q13 -8 27 -3" stroke="#654b3a" stroke-width="3.3" fill="none" stroke-linecap="round"/>
+      <path d="M193 ${headY - 24} q13 -7 27 -2" stroke="#654b3a" stroke-width="3.3" fill="none" stroke-linecap="round"/>
+    `,
+    eyes: `
+      <path d="M143 ${headY - 7} q11 9 22 0" stroke="#3b2d24" stroke-width="4.2" fill="none" stroke-linecap="round"/>
+      <path d="M195 ${headY - 7} q11 9 22 0" stroke="#3b2d24" stroke-width="4.2" fill="none" stroke-linecap="round"/>
+    `,
+    mouth: `<path d="M158 ${headY + 22} Q180 ${headY + 44} 202 ${headY + 22}" stroke="#5d4334" stroke-width="3.7" fill="none" stroke-linecap="round"/>`,
+  };
+}
+
+function getMotionProfile(count, type) {
+  const safe = Math.max(0, Number(count) || 0);
+  const energy = clampNumber(safe / 12, 0, 1);
+  const typeFactor = type === "dog" ? 0.2 : type === "cat" ? 0.08 : 0;
+  return {
+    body: (3.2 - energy * 1.1).toFixed(2),
+    tail: (1.9 - energy * 0.7 - typeFactor).toFixed(2),
+    ear: (2.6 - energy * 0.6).toFixed(2),
+    float: (4.0 - energy * 1.1).toFixed(2),
+    tilt: `${3 + energy * 2.2}deg`,
+  };
+}
+
+function applyCharacterMotion(target, count, type) {
+  const motion = getMotionProfile(count, type);
+  target.style.setProperty("--float-duration", `${motion.float}s`);
+  target.style.setProperty("--tilt-amount", motion.tilt);
+}
+
+function getRecentDaysData(days) {
+  const result = [];
+  for (let i = days - 1; i >= 0; i -= 1) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const key = getKSTDateKey(date);
+    result.push({ key, label: key.slice(5), count: Number(state.history[key] || 0) });
+  }
+  return result;
+}
+
+function renderHistory() {
+  const data = getRecentDaysData(state.period);
+  renderChart(data);
+  renderSummary(data);
+}
+
+function renderChart(data) {
+  const max = Math.max(1, ...data.map((item) => item.count));
+  historyChart.innerHTML = "";
+
+  data.forEach((item) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "bar-item";
+    wrapper.title = `${item.key}: ${item.count}회`;
+    wrapper.innerHTML = `
+      <div class="bar-value">${item.count}회</div>
+      <div class="bar-column"><div class="bar-fill" style="height:${Math.max(2, Math.round((item.count / max) * 100))}%;"></div></div>
+      <div class="bar-label">${item.label}</div>
+    `;
+    historyChart.appendChild(wrapper);
+  });
+}
+
+function renderSummary(data) {
+  const total = data.reduce((acc, curr) => acc + curr.count, 0);
+  const avg = total / data.length;
+  const maxValue = Math.max(...data.map((item) => item.count));
+  const minValue = Math.min(...data.map((item) => item.count));
+  const max = data.find((item) => item.count === maxValue);
+  const min = data.find((item) => item.count === minValue);
+
+  totalCount.textContent = `${total}회`;
+  avgCount.textContent = `${avg.toFixed(1)}회`;
+  maxDay.textContent = `${max.label} / ${maxValue}회`;
+  minDay.textContent = `${min.label} / ${minValue}회`;
+}
+
+function renderSettings() {
+  dailyGoalInput.value = String(state.settings.dailyGoal);
+  characterTypeSelect.value = state.settings.characterType;
+  themeSelect.value = state.settings.theme;
+  updateSettingsCharacterPreview(state.settings.characterType);
+  settingsStatus.textContent = "";
+}
+
+function updateSettingsCharacterPreview(type) {
+  const safeType = sanitizeCharacterType(type);
+  const currentCount = getTodayCount();
+  settingsCharacterPreview.src = buildCharacterSvgDataUri(currentCount, safeType);
+  applyCharacterMotion(settingsCharacterPreview, currentCount, safeType);
+}
