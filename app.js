@@ -17,10 +17,10 @@ const state = {
 const levelMessages = {
   0: "오늘은 아직 간식 전이에요.",
   1: "가볍게 하나 먹었어요.",
-  2: "간식 타임이 즐거웠네요.",
+  2: "간식 타임이 즐거웠나요?",
   3: "오늘은 꽤 먹었네요.",
   4: "이제 그만 먹어도 되지 않을까요?",
-  5: "내일은 오늘보다 적게 먹는 게 나을 것 같네요.",
+  5: "더 먹으면 위험해요!!",
 };
 
 const characterPalettes = {
@@ -32,7 +32,7 @@ const characterPalettes = {
 const characterLabels = {
   cat: "고양이",
   hamster: "햄스터",
-  dog: "강아지",
+  dog: "초코푸들",
 };
 
 const CAT_IMAGE_LEVEL_THRESHOLDS = [
@@ -135,7 +135,7 @@ function saveSettingsFromForm() {
   saveSnackSettings();
   applyTheme();
   renderMain();
-  settingsStatus.textContent = "설정을 저장했어요.";
+  settingsStatus.textContent = "설정 저장 완료";
 }
 
 function clearAllHistory() {
@@ -275,7 +275,7 @@ function renderMain() {
   const goalMessage =
     count <= state.settings.dailyGoal
       ? `목표(${state.settings.dailyGoal}회) 안에서 기록 중이에요.`
-      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 내일은 적당히 먹어요! 살쪄요!!!`;
+      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 지방이 꿈틀대요!!!`;
 
   todayLabel.textContent = `${getKSTDateLabel()} · ${characterLabels[type]}`;
   countLabel.textContent = `${count}회`;
