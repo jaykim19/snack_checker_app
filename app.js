@@ -4,8 +4,17 @@ const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const KST_OFFSET_MINUTES = 9 * 60;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const KST_DATE_FORMATTER = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Seoul",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const KST_WEEKDAY_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Seoul",
+  weekday: "short",
+});
 const CHARACTER_TYPES = ["cat", "hamster", "dog"];
 const DEFAULT_SETTINGS = {
   dailyGoal: 3,
@@ -193,10 +202,8 @@ function sanitizeCharacterType(type) {
 }
 
 function getKSTDateKey(date = new Date()) {
-  const safeDate = date instanceof Date ? date : new Date();
-  const utcMs = safeDate.getTime() + safeDate.getTimezoneOffset() * 60000;
-  const kstDate = new Date(utcMs + KST_OFFSET_MINUTES * 60000);
-  return formatDateKeyFromUTCDate(kstDate);
+  const { year, month, day } = getKSTDateParts(date);
+  return `${year}-${month}-${day}`;
 }
 
 function getKSTDateLabel(date = new Date()) {
@@ -541,7 +548,11 @@ function getRecentDaysData(days) {
   const result = [];
   for (let i = days - 1; i >= 0; i -= 1) {
     const key = getKSTDateKeyByOffset(i);
-    result.push({ key, label: key.slice(5), count: sanitizeSnackCount(state.history[key] || 0) });
+    result.push({
+      key,
+      label: formatHistoryLabelByOffset(key, i, days),
+      count: sanitizeSnackCount(state.history[key] || 0),
+    });
   }
   return result;
 }
@@ -554,7 +565,10 @@ function renderHistory() {
 
 function renderChart(data) {
   historyChart.innerHTML = `
-    <div class="bar-guide">20회 기준선</div>
+    <div class="bar-guide">
+      <span class="bar-guide-item">20회 기준선</span>
+      <span class="bar-guide-item">10회 중간선</span>
+    </div>
     <div class="bar-list"></div>
   `;
   const barList = historyChart.querySelector(".bar-list");
@@ -568,6 +582,7 @@ function renderChart(data) {
       <div class="bar-value">${item.count}회</div>
       <div class="bar-column">
         <div class="bar-cap-line" aria-hidden="true"></div>
+        <div class="bar-mid-line" aria-hidden="true"></div>
         <div class="bar-fill" style="height:${fillHeight}%;"></div>
       </div>
       <div class="bar-label">${item.label}</div>
@@ -658,10 +673,9 @@ function normalizeDailyGoalInputValue() {
 
 function getKSTDateKeyByOffset(daysAgo) {
   const safeDaysAgo = Math.max(0, Math.floor(Number(daysAgo) || 0));
-  const now = new Date();
-  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-  const targetKst = new Date(utcMs + KST_OFFSET_MINUTES * 60000 - safeDaysAgo * DAY_MS);
-  return formatDateKeyFromUTCDate(targetKst);
+  const { year, month, day } = getKSTDateParts(new Date());
+  const baseUtcMs = Date.UTC(Number(year), Number(month) - 1, Number(day)) - safeDaysAgo * DAY_MS;
+  return formatDateKeyFromUTCDate(new Date(baseUtcMs));
 }
 
 function formatDateKeyFromUTCDate(date) {
@@ -691,6 +705,38 @@ function normalizeHistoryDateKey(rawKey) {
     return null;
   }
   return getKSTDateKey(parsed);
+}
+
+function formatHistoryLabelByOffset(key, daysAgo, periodDays) {
+  if (daysAgo === 0) {
+    return "오늘";
+  }
+  if (daysAgo === 1) {
+    return "어제";
+  }
+  if (periodDays <= 7) {
+    return `${key.slice(5)}(${getKSTWeekdayLabelByOffset(daysAgo)})`;
+  }
+  if (periodDays <= 14) {
+    return key.slice(5);
+  }
+  return `${key.slice(2, 4)}.${key.slice(5, 7)}.${key.slice(8, 10)}`;
+}
+
+function getKSTWeekdayLabelByOffset(daysAgo) {
+  const safeDaysAgo = Math.max(0, Math.floor(Number(daysAgo) || 0));
+  const { year, month, day } = getKSTDateParts(new Date());
+  const baseUtcMs = Date.UTC(Number(year), Number(month) - 1, Number(day)) - safeDaysAgo * DAY_MS;
+  return KST_WEEKDAY_FORMATTER.format(new Date(baseUtcMs));
+}
+
+function getKSTDateParts(date = new Date()) {
+  const safeDate = date instanceof Date ? date : new Date();
+  const parts = KST_DATE_FORMATTER.formatToParts(safeDate);
+  const year = parts.find((part) => part.type === "year")?.value ?? "1970";
+  const month = parts.find((part) => part.type === "month")?.value ?? "01";
+  const day = parts.find((part) => part.type === "day")?.value ?? "01";
+  return { year, month, day };
 }
 
 function updateSettingsCharacterPreview(type) {
