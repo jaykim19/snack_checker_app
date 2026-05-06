@@ -3,6 +3,7 @@ const SETTINGS_KEY = "snack_settings";
 const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
+const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const CHARACTER_TYPES = ["cat", "hamster", "dog"];
 const DEFAULT_SETTINGS = {
   dailyGoal: 3,
@@ -93,6 +94,8 @@ function bindEvents() {
   document.getElementById("increaseBtn").addEventListener("click", () => updateTodayCount(1));
   document.getElementById("decreaseBtn").addEventListener("click", () => updateTodayCount(-1));
   document.getElementById("resetBtn").addEventListener("click", resetTodayCount);
+  dailyGoalInput.max = String(MAX_DAILY_GOAL);
+  dailyGoalInput.addEventListener("input", normalizeDailyGoalInputValue);
 
   document.getElementById("goHistoryBtn").addEventListener("click", () => {
     setActiveView("history");
@@ -128,13 +131,19 @@ function bindEvents() {
 }
 
 function saveSettingsFromForm() {
+  normalizeDailyGoalInputValue();
   state.settings = {
     dailyGoal: clampNumber(Number(dailyGoalInput.value || 0), 0, MAX_DAILY_GOAL),
     characterType: sanitizeCharacterType(characterTypeSelect.value),
     theme: themeSelect.value === "dark" ? "dark" : "light",
   };
 
-  saveSnackSettings();
+  if (!saveSnackSettings()) {
+    settingsStatus.textContent = "저장 공간 접근이 제한되어 설정이 임시로만 적용돼요.";
+    applyTheme();
+    renderMain();
+    return;
+  }
   applyTheme();
   renderMain();
   settingsStatus.textContent = "설정 저장 완료";
@@ -215,44 +224,23 @@ function getCharacterLevel(count) {
 }
 
 function loadSnackHistory() {
-  const raw = localStorage.getItem(HISTORY_KEY);
-  if (!raw) return {};
-  try {
-    const parsed = JSON.parse(raw);
-    if (typeof parsed !== "object" || !parsed) {
-      return {};
-    }
-    const normalized = {};
-    Object.entries(parsed).forEach(([key, value]) => {
-      normalized[key] = sanitizeSnackCount(value);
-    });
-    return normalized;
-  } catch {
-    return {};
-  }
+  const parsed = readStorageJson(HISTORY_KEY);
+  return sanitizeHistoryObject(parsed);
 }
 
 function saveSnackHistory() {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history));
+  state.history = sanitizeHistoryObject(state.history);
+  return writeStorageJson(HISTORY_KEY, state.history);
 }
 
 function loadSnackSettings() {
-  const raw = localStorage.getItem(SETTINGS_KEY);
-  if (!raw) return { ...DEFAULT_SETTINGS };
-  try {
-    const parsed = JSON.parse(raw);
-    return {
-      dailyGoal: clampNumber(Number(parsed.dailyGoal), 0, MAX_DAILY_GOAL),
-      characterType: sanitizeCharacterType(parsed.characterType),
-      theme: parsed.theme === "dark" ? "dark" : "light",
-    };
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
+  const parsed = readStorageJson(SETTINGS_KEY);
+  return sanitizeSettingsObject(parsed);
 }
 
 function saveSnackSettings() {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  state.settings = sanitizeSettingsObject(state.settings);
+  return writeStorageJson(SETTINGS_KEY, state.settings);
 }
 
 function applyTheme() {
@@ -598,6 +586,52 @@ function sanitizeSnackCount(value) {
   return clampNumber(Math.round(Number(value) || 0), 0, MAX_DAILY_SNACK_COUNT);
 }
 
+function sanitizeHistoryObject(rawHistory) {
+  if (!rawHistory || typeof rawHistory !== "object") {
+    return {};
+  }
+
+  const normalized = {};
+  Object.entries(rawHistory).forEach(([key, value]) => {
+    if (!DATE_KEY_PATTERN.test(key)) {
+      return;
+    }
+    normalized[key] = sanitizeSnackCount(value);
+  });
+  return normalized;
+}
+
+function sanitizeSettingsObject(rawSettings) {
+  const source = rawSettings && typeof rawSettings === "object" ? rawSettings : {};
+  const dailyGoalSource = source.dailyGoal ?? DEFAULT_SETTINGS.dailyGoal;
+  return {
+    dailyGoal: clampNumber(Number(dailyGoalSource), 0, MAX_DAILY_GOAL),
+    characterType: sanitizeCharacterType(source.characterType),
+    theme: source.theme === "dark" ? "dark" : "light",
+  };
+}
+
+function readStorageJson(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      return null;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorageJson(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function renderSummary(data) {
   const total = data.reduce((acc, curr) => acc + curr.count, 0);
   const avg = total / data.length;
@@ -613,11 +647,16 @@ function renderSummary(data) {
 }
 
 function renderSettings() {
+  dailyGoalInput.max = String(MAX_DAILY_GOAL);
   dailyGoalInput.value = String(state.settings.dailyGoal);
   characterTypeSelect.value = state.settings.characterType;
   themeSelect.value = state.settings.theme;
   updateSettingsCharacterPreview(state.settings.characterType);
   settingsStatus.textContent = "";
+}
+
+function normalizeDailyGoalInputValue() {
+  dailyGoalInput.value = String(clampNumber(Number(dailyGoalInput.value || 0), 0, MAX_DAILY_GOAL));
 }
 
 function updateSettingsCharacterPreview(type) {
