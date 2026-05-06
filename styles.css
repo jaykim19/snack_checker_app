@@ -306,11 +306,24 @@ button:disabled {
 .bar-chart {
   width: 100%;
   min-height: 260px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 6px;
+}
+
+.bar-guide {
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.bar-list {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  padding-top: 10px;
   overflow-x: auto;
+  padding-top: 8px;
 }
 
 .bar-item {
@@ -333,6 +346,17 @@ button:disabled {
   display: flex;
   align-items: flex-end;
   overflow: hidden;
+  position: relative;
+}
+
+.bar-cap-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  border-top: 2px dashed color-mix(in srgb, var(--primary) 65%, var(--line) 35%);
+  opacity: 0.9;
+  z-index: 2;
 }
 
 .bar-fill {

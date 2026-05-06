@@ -1,9 +1,11 @@
 const HISTORY_KEY = "snack_history";
 const SETTINGS_KEY = "snack_settings";
 const PERIOD_DEFAULT = 7;
+const MAX_DAILY_SNACK_COUNT = 20;
+const MAX_DAILY_GOAL = 10;
 const CHARACTER_TYPES = ["cat", "hamster", "dog"];
 const DEFAULT_SETTINGS = {
-  dailyGoal: 2,
+  dailyGoal: 3,
   characterType: "cat",
   theme: "light",
 };
@@ -127,7 +129,7 @@ function bindEvents() {
 
 function saveSettingsFromForm() {
   state.settings = {
-    dailyGoal: clampNumber(Number(dailyGoalInput.value || 0), 0, 20),
+    dailyGoal: clampNumber(Number(dailyGoalInput.value || 0), 0, MAX_DAILY_GOAL),
     characterType: sanitizeCharacterType(characterTypeSelect.value),
     theme: themeSelect.value === "dark" ? "dark" : "light",
   };
@@ -217,7 +219,14 @@ function loadSnackHistory() {
   if (!raw) return {};
   try {
     const parsed = JSON.parse(raw);
-    return typeof parsed === "object" && parsed ? parsed : {};
+    if (typeof parsed !== "object" || !parsed) {
+      return {};
+    }
+    const normalized = {};
+    Object.entries(parsed).forEach(([key, value]) => {
+      normalized[key] = sanitizeSnackCount(value);
+    });
+    return normalized;
   } catch {
     return {};
   }
@@ -233,7 +242,7 @@ function loadSnackSettings() {
   try {
     const parsed = JSON.parse(raw);
     return {
-      dailyGoal: clampNumber(Number(parsed.dailyGoal), 0, 20),
+      dailyGoal: clampNumber(Number(parsed.dailyGoal), 0, MAX_DAILY_GOAL),
       characterType: sanitizeCharacterType(parsed.characterType),
       theme: parsed.theme === "dark" ? "dark" : "light",
     };
@@ -251,12 +260,14 @@ function applyTheme() {
 }
 
 function getTodayCount() {
-  return Number(state.history[getKSTDateKey()] || 0);
+  return sanitizeSnackCount(state.history[getKSTDateKey()] || 0);
 }
 
 function updateTodayCount(delta) {
   const today = getKSTDateKey();
-  state.history[today] = Math.max(0, Number(state.history[today] || 0) + delta);
+  const currentCount = sanitizeSnackCount(state.history[today] || 0);
+  const nextCount = clampNumber(currentCount + delta, 0, MAX_DAILY_SNACK_COUNT);
+  state.history[today] = nextCount;
   persistAndRender();
 }
 
@@ -283,6 +294,7 @@ function renderMain() {
   characterImage.src = buildCharacterSvgDataUri(count, type);
   characterImage.alt = `${characterLabels[type]} 캐릭터`;
   decreaseBtn.disabled = count === 0;
+  document.getElementById("increaseBtn").disabled = count >= MAX_DAILY_SNACK_COUNT;
 }
 
 function buildCharacterSvgDataUri(count, rawType) {
@@ -547,7 +559,7 @@ function getRecentDaysData(days) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const key = getKSTDateKey(date);
-    result.push({ key, label: key.slice(5), count: Number(state.history[key] || 0) });
+    result.push({ key, label: key.slice(5), count: sanitizeSnackCount(state.history[key] || 0) });
   }
   return result;
 }
@@ -559,20 +571,31 @@ function renderHistory() {
 }
 
 function renderChart(data) {
-  const max = Math.max(1, ...data.map((item) => item.count));
-  historyChart.innerHTML = "";
+  historyChart.innerHTML = `
+    <div class="bar-guide">20회 기준선</div>
+    <div class="bar-list"></div>
+  `;
+  const barList = historyChart.querySelector(".bar-list");
 
   data.forEach((item) => {
+    const fillHeight = clampNumber((item.count / MAX_DAILY_SNACK_COUNT) * 100, 0, 100);
     const wrapper = document.createElement("div");
     wrapper.className = "bar-item";
     wrapper.title = `${item.key}: ${item.count}회`;
     wrapper.innerHTML = `
       <div class="bar-value">${item.count}회</div>
-      <div class="bar-column"><div class="bar-fill" style="height:${Math.max(2, Math.round((item.count / max) * 100))}%;"></div></div>
+      <div class="bar-column">
+        <div class="bar-cap-line" aria-hidden="true"></div>
+        <div class="bar-fill" style="height:${fillHeight}%;"></div>
+      </div>
       <div class="bar-label">${item.label}</div>
     `;
-    historyChart.appendChild(wrapper);
+    barList.appendChild(wrapper);
   });
+}
+
+function sanitizeSnackCount(value) {
+  return clampNumber(Math.round(Number(value) || 0), 0, MAX_DAILY_SNACK_COUNT);
 }
 
 function renderSummary(data) {
