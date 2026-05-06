@@ -4,6 +4,8 @@ const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const KST_OFFSET_MINUTES = 9 * 60;
+const DAY_MS = 24 * 60 * 60 * 1000;
 const CHARACTER_TYPES = ["cat", "hamster", "dog"];
 const DEFAULT_SETTINGS = {
   dailyGoal: 3,
@@ -191,16 +193,10 @@ function sanitizeCharacterType(type) {
 }
 
 function getKSTDateKey(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const y = parts.find((p) => p.type === "year")?.value;
-  const m = parts.find((p) => p.type === "month")?.value;
-  const d = parts.find((p) => p.type === "day")?.value;
-  return `${y}-${m}-${d}`;
+  const safeDate = date instanceof Date ? date : new Date();
+  const utcMs = safeDate.getTime() + safeDate.getTimezoneOffset() * 60000;
+  const kstDate = new Date(utcMs + KST_OFFSET_MINUTES * 60000);
+  return formatDateKeyFromUTCDate(kstDate);
 }
 
 function getKSTDateLabel(date = new Date()) {
@@ -544,9 +540,7 @@ function getExpressionByCount(count, headY) {
 function getRecentDaysData(days) {
   const result = [];
   for (let i = days - 1; i >= 0; i -= 1) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const key = getKSTDateKey(date);
+    const key = getKSTDateKeyByOffset(i);
     result.push({ key, label: key.slice(5), count: sanitizeSnackCount(state.history[key] || 0) });
   }
   return result;
@@ -593,10 +587,13 @@ function sanitizeHistoryObject(rawHistory) {
 
   const normalized = {};
   Object.entries(rawHistory).forEach(([key, value]) => {
-    if (!DATE_KEY_PATTERN.test(key)) {
+    const normalizedKey = normalizeHistoryDateKey(key);
+    if (!normalizedKey) {
       return;
     }
-    normalized[key] = sanitizeSnackCount(value);
+    const nextValue = sanitizeSnackCount(value);
+    const prevValue = sanitizeSnackCount(normalized[normalizedKey] || 0);
+    normalized[normalizedKey] = Math.max(prevValue, nextValue);
   });
   return normalized;
 }
@@ -657,6 +654,43 @@ function renderSettings() {
 
 function normalizeDailyGoalInputValue() {
   dailyGoalInput.value = String(clampNumber(Number(dailyGoalInput.value || 0), 0, MAX_DAILY_GOAL));
+}
+
+function getKSTDateKeyByOffset(daysAgo) {
+  const safeDaysAgo = Math.max(0, Math.floor(Number(daysAgo) || 0));
+  const now = new Date();
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const targetKst = new Date(utcMs + KST_OFFSET_MINUTES * 60000 - safeDaysAgo * DAY_MS);
+  return formatDateKeyFromUTCDate(targetKst);
+}
+
+function formatDateKeyFromUTCDate(date) {
+  const year = String(date.getUTCFullYear());
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeHistoryDateKey(rawKey) {
+  if (typeof rawKey !== "string") {
+    return null;
+  }
+  const trimmed = rawKey.trim();
+  if (DATE_KEY_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+
+  const separated = trimmed.match(/^(\d{4})[./-](\d{1,2})[./-](\d{1,2})$/);
+  if (separated) {
+    const normalized = `${separated[1]}-${String(separated[2]).padStart(2, "0")}-${String(separated[3]).padStart(2, "0")}`;
+    return DATE_KEY_PATTERN.test(normalized) ? normalized : null;
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+  return getKSTDateKey(parsed);
 }
 
 function updateSettingsCharacterPreview(type) {
