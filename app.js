@@ -77,6 +77,7 @@ const POODLE_IMAGE_LEVEL_THRESHOLDS = [
 const mainView = document.getElementById("mainView");
 const historyView = document.getElementById("historyView");
 const settingsView = document.getElementById("settingsView");
+const aboutView = document.getElementById("aboutView");
 const historyChart = document.getElementById("historyChart");
 const splashView = document.getElementById("splashView");
 const appShell = document.getElementById("appShell");
@@ -109,6 +110,9 @@ function bindEvents() {
   document.getElementById("increaseBtn").addEventListener("click", () => updateTodayCount(1));
   document.getElementById("decreaseBtn").addEventListener("click", () => updateTodayCount(-1));
   document.getElementById("resetBtn").addEventListener("click", resetTodayCount);
+  document.getElementById("infoBtn")?.addEventListener("click", () => {
+    setActiveView("about");
+  });
   dailyGoalInput.max = String(MAX_DAILY_GOAL);
   dailyGoalInput.addEventListener("input", normalizeDailyGoalInputValue);
 
@@ -125,6 +129,10 @@ function bindEvents() {
     renderMain();
   });
   document.getElementById("backFromSettingsBtn").addEventListener("click", () => {
+    setActiveView("main");
+    renderMain();
+  });
+  document.getElementById("backFromAboutBtn")?.addEventListener("click", () => {
     setActiveView("main");
     renderMain();
   });
@@ -237,11 +245,13 @@ function clearAllHistory() {
 }
 
 function setActiveView(name) {
-  [mainView, historyView, settingsView].forEach((view) => view.classList.remove("view-active"));
+  [mainView, historyView, settingsView, aboutView].forEach((view) => view?.classList.remove("view-active"));
   if (name === "history") {
     historyView.classList.add("view-active");
   } else if (name === "settings") {
     settingsView.classList.add("view-active");
+  } else if (name === "about") {
+    aboutView?.classList.add("view-active");
   } else {
     mainView.classList.add("view-active");
   }

@@ -114,6 +114,9 @@ body {
   margin: 0;
   color: var(--muted);
   font-weight: 700;
+  opacity: 0;
+  animation: splash-item-fade-in 0.68s ease forwards;
+  animation-delay: 0.2s;
 }
 
 .splash-title {
@@ -126,6 +129,9 @@ body {
   color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
+  opacity: 0;
+  animation: splash-item-fade-in 0.72s ease forwards;
+  animation-delay: 0.55s;
 }
 
 .splash-buddy-row {
@@ -136,18 +142,25 @@ body {
 }
 
 .splash-buddy-image {
+  --fade-delay: 0.95s;
   width: min(28vw, 110px);
   height: auto;
   filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.1));
-  animation: splash-buddy-pop 1.2s ease-in-out infinite;
+  opacity: 0;
+  animation:
+    splash-item-fade-in 0.7s ease forwards,
+    splash-buddy-pop 1.2s ease-in-out infinite;
+  animation-delay:
+    var(--fade-delay),
+    calc(var(--fade-delay) + 0.7s);
 }
 
 .splash-buddy-image:nth-child(2) {
-  animation-delay: 0.14s;
+  --fade-delay: 1.18s;
 }
 
 .splash-buddy-image:nth-child(3) {
-  animation-delay: 0.28s;
+  --fade-delay: 1.41s;
 }
 
 .splash-copy {
@@ -155,6 +168,9 @@ body {
   font-size: 1rem;
   font-weight: 700;
   color: var(--muted);
+  opacity: 0;
+  animation: splash-item-fade-in 0.72s ease forwards;
+  animation-delay: 1.75s;
 }
 
 .splash-touch-guide {
@@ -164,11 +180,19 @@ body {
   transform: translateX(-50%);
   margin: 0;
   width: calc(100% - 32px);
+  display: flex;
+  justify-content: center;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: clamp(1.22rem, 4.6vw, 1.34rem);
   font-weight: 800;
   color: color-mix(in srgb, var(--text) 68%, var(--muted) 32%);
-  animation: splash-guide-blink 1.1s ease-in-out infinite;
+  opacity: 0;
+  animation:
+    splash-touch-guide-fade-in 0.72s ease forwards,
+    splash-guide-blink 1.1s ease-in-out infinite;
+  animation-delay:
+    2.55s,
+    3.28s;
 }
 
 .app-shell-hidden {
@@ -201,6 +225,28 @@ body {
   }
 }
 
+@keyframes splash-item-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-touch-guide-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 .view {
   display: none;
 }
@@ -215,8 +261,44 @@ body {
 }
 
 .app-header {
+  position: relative;
+  padding-right: 34px;
   text-align: center;
   margin-bottom: 8px;
+}
+
+.info-icon-btn {
+  position: absolute;
+  top: 25%;
+  right: 0;
+  /* transform: translateY(-50%); */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted);
+  font-family: "Baloo 2", "Noto Sans KR", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.14s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+/* .info-icon-btn:active {
+  transform: translateY(-50%) scale(0.96);
+} */
+
+.info-icon-btn:focus-visible {
+  outline: none;
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--line) 42%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent 78%);
 }
 
 .app-title {
@@ -289,6 +371,13 @@ body {
   margin: 8px 0 16px;
   font-size: 2rem;
   font-weight: 700;
+}
+
+.about-service-name {
+  margin: 8px 0 16px;
+  font-size: 1.24rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .button-row {

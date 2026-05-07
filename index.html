@@ -20,13 +20,14 @@
         </div>
         <p class="splash-copy">당신의 Buddy 와 먹은 간식 횟수를 세어보아요!!</p>
       </div>
-      <p class="splash-touch-guide">화면을 터치해주세요</p>
+      <p class="splash-touch-guide">PRESS START BUTTON</p>
       <p class="global-copyright">© 2026 Snack Buddy. All snacks reserved. 🍪</p>
     </section>
 
     <main id="appShell" class="app-shell app-shell-hidden">
       <section id="mainView" class="view view-active" aria-label="메인 화면">
         <header class="app-header">
+          <button id="infoBtn" class="info-icon-btn" type="button" aria-label="앱 정보 보기">i</button>
           <h1 class="app-title">Snack Buddy</h1>
           <p id="todayLabel" class="subtle"></p>
         </header>
@@ -129,6 +130,23 @@
           <button id="saveSettingsBtn" class="primary">설정 저장</button>
           <button id="clearAllBtn" class="danger" disabled>전체 기록 초기화</button>
           <p id="settingsStatus" class="subtle"></p>
+        </section>
+      </section>
+
+      <section id="aboutView" class="view" aria-label="앱 정보 화면">
+        <header class="history-header">
+          <button id="backFromAboutBtn" class="ghost">← 뒤로가기</button>
+          <h2>앱 정보</h2>
+        </header>
+
+        <section class="counter-card">
+          <p class="field-label">서비스명</p>
+          <p class="about-service-name">Snack Buddy</p>
+
+          <p class="field-label">만든이</p>
+          <p class="subtle">디자인: 김지영, 윤혜준</p>
+          <p class="subtle">개발: 김지영</p>
+          <p class="subtle">기획: 윤혜준, 김지영</p>
         </section>
       </section>
     </main>
