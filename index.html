@@ -8,7 +8,20 @@
     <link rel="stylesheet" href="./styles.css?v=20260507" />
   </head>
   <body>
-    <main class="app-shell">
+    <section id="splashView" class="splash-view" aria-label="시작 화면">
+      <div class="splash-card">
+        <p class="splash-kicker">Welcome to</p>
+        <h1 class="splash-title">Snack Buddy</h1>
+        <div class="splash-buddy-row" aria-hidden="true">
+          <img src="./characters/cats/cat_lv1.svg" alt="" class="splash-buddy-image" />
+          <img src="./characters/hamsters/hamster_lv1.svg" alt="" class="splash-buddy-image" />
+          <img src="./characters/puddles/poodle_lv1.svg" alt="" class="splash-buddy-image" />
+        </div>
+        <p class="splash-copy">당신의 Buddy와 먹은 간식을 세어보아요!!</p>
+      </div>
+    </section>
+
+    <main id="appShell" class="app-shell app-shell-hidden">
       <section id="mainView" class="view view-active" aria-label="메인 화면">
         <header class="app-header">
           <h1 class="app-title">Snack Buddy</h1>

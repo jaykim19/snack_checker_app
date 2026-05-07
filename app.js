@@ -3,6 +3,7 @@ const SETTINGS_KEY = "snack_settings";
 const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
+const SPLASH_DURATION_MS = 4000;
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const KST_DATE_FORMATTER = new Intl.DateTimeFormat("en-CA", {
@@ -77,6 +78,8 @@ const mainView = document.getElementById("mainView");
 const historyView = document.getElementById("historyView");
 const settingsView = document.getElementById("settingsView");
 const historyChart = document.getElementById("historyChart");
+const splashView = document.getElementById("splashView");
+const appShell = document.getElementById("appShell");
 
 const todayLabel = document.getElementById("todayLabel");
 const countLabel = document.getElementById("countLabel");
@@ -100,6 +103,7 @@ const periodButtons = Array.from(document.querySelectorAll(".period-btn"));
 bindEvents();
 applyTheme();
 renderMain();
+runSplashIntro();
 
 function bindEvents() {
   document.getElementById("increaseBtn").addEventListener("click", () => updateTodayCount(1));
@@ -139,6 +143,17 @@ function bindEvents() {
   characterTypeSelect.addEventListener("change", () => {
     updateSettingsCharacterPreview(characterTypeSelect.value);
   });
+}
+
+function runSplashIntro() {
+  if (!splashView || !appShell) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    splashView.classList.add("splash-hidden");
+    appShell.classList.remove("app-shell-hidden");
+  }, SPLASH_DURATION_MS);
 }
 
 function saveSettingsFromForm() {
