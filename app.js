@@ -564,10 +564,13 @@ function renderHistory() {
 }
 
 function renderChart(data) {
+  const goalCount = clampNumber(Number(state.settings.dailyGoal || 0), 0, MAX_DAILY_SNACK_COUNT);
+  const goalTopPercent = 100 - (goalCount / MAX_DAILY_SNACK_COUNT) * 100;
   historyChart.innerHTML = `
     <div class="bar-guide">
       <span class="bar-guide-item">20회 기준선</span>
       <span class="bar-guide-item">10회 중간선</span>
+      <span class="bar-guide-item bar-guide-item-goal">하루 목표 ${goalCount}회</span>
     </div>
     <div class="bar-list"></div>
   `;
@@ -583,6 +586,7 @@ function renderChart(data) {
       <div class="bar-column">
         <div class="bar-cap-line" aria-hidden="true"></div>
         <div class="bar-mid-line" aria-hidden="true"></div>
+        <div class="bar-goal-line" style="top:${goalTopPercent}%;" aria-hidden="true"></div>
         <div class="bar-fill" style="height:${fillHeight}%;"></div>
       </div>
       <div class="bar-label">${item.label}</div>
@@ -714,13 +718,7 @@ function formatHistoryLabelByOffset(key, daysAgo, periodDays) {
   if (daysAgo === 1) {
     return "어제";
   }
-  if (periodDays <= 7) {
-    return `${key.slice(5)}(${getKSTWeekdayLabelByOffset(daysAgo)})`;
-  }
-  if (periodDays <= 14) {
-    return key.slice(5);
-  }
-  return `${key.slice(2, 4)}.${key.slice(5, 7)}.${key.slice(8, 10)}`;
+  return `${key.slice(5)}(${getKSTWeekdayLabelByOffset(daysAgo)})`;
 }
 
 function getKSTWeekdayLabelByOffset(daysAgo) {

@@ -326,6 +326,10 @@ button:disabled {
   background: color-mix(in srgb, var(--primary) 12%, transparent 88%);
 }
 
+.bar-guide-item-goal {
+  background: color-mix(in srgb, #8a63ff 20%, transparent 80%);
+}
+
 .bar-list {
   display: flex;
   align-items: flex-end;
@@ -374,6 +378,15 @@ button:disabled {
   top: 50%;
   border-top: 1px dashed color-mix(in srgb, var(--primary) 45%, var(--line) 55%);
   opacity: 0.85;
+  z-index: 2;
+}
+
+.bar-goal-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed color-mix(in srgb, #8a63ff 75%, var(--line) 25%);
+  opacity: 0.95;
   z-index: 2;
 }
 
