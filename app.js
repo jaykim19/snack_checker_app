@@ -3,6 +3,7 @@ const SETTINGS_KEY = "snack_settings";
 const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
+const SPLASH_SEEN_SESSION_KEY = "snack_splash_seen_session";
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const KST_DATE_FORMATTER = new Intl.DateTimeFormat("en-CA", {
@@ -149,15 +150,38 @@ function runSplashIntro() {
     return;
   }
 
+  if (hasSeenSplashInSession()) {
+    splashView.classList.add("splash-hidden");
+    appShell.classList.remove("app-shell-hidden");
+    return;
+  }
+
   const dismissSplash = () => {
     if (splashView.classList.contains("splash-hidden")) {
       return;
     }
     splashView.classList.add("splash-hidden");
     appShell.classList.remove("app-shell-hidden");
+    markSplashSeenInSession();
   };
 
-  splashView.addEventListener("pointerdown", dismissSplash);
+  splashView.addEventListener("pointerdown", dismissSplash, { once: true });
+}
+
+function hasSeenSplashInSession() {
+  try {
+    return sessionStorage.getItem(SPLASH_SEEN_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markSplashSeenInSession() {
+  try {
+    sessionStorage.setItem(SPLASH_SEEN_SESSION_KEY, "1");
+  } catch {
+    // sessionStorage 접근이 제한된 환경에서는 기본 동작(스플래시 표시)을 유지합니다.
+  }
 }
 
 function saveSettingsFromForm() {
