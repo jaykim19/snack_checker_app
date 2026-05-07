@@ -3,7 +3,6 @@ const SETTINGS_KEY = "snack_settings";
 const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
-const SPLASH_DURATION_MS = 4000;
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const KST_DATE_FORMATTER = new Intl.DateTimeFormat("en-CA", {
@@ -150,10 +149,15 @@ function runSplashIntro() {
     return;
   }
 
-  window.setTimeout(() => {
+  const dismissSplash = () => {
+    if (splashView.classList.contains("splash-hidden")) {
+      return;
+    }
     splashView.classList.add("splash-hidden");
     appShell.classList.remove("app-shell-hidden");
-  }, SPLASH_DURATION_MS);
+  };
+
+  splashView.addEventListener("pointerdown", dismissSplash);
 }
 
 function saveSettingsFromForm() {
