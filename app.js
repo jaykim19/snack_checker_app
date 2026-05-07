@@ -156,13 +156,35 @@ function runSplashIntro() {
     return;
   }
 
+  let isSplashDismissing = false;
+
   const dismissSplash = () => {
-    if (splashView.classList.contains("splash-hidden")) {
+    if (isSplashDismissing || splashView.classList.contains("splash-hidden")) {
       return;
     }
-    splashView.classList.add("splash-hidden");
+    isSplashDismissing = true;
+    splashView.classList.add("splash-closing");
     appShell.classList.remove("app-shell-hidden");
-    markSplashSeenInSession();
+
+    let isSplashDismissFinalized = false;
+    const finalizeSplashDismiss = () => {
+      if (isSplashDismissFinalized) {
+        return;
+      }
+      isSplashDismissFinalized = true;
+      splashView.classList.remove("splash-closing");
+      splashView.classList.add("splash-hidden");
+      markSplashSeenInSession();
+    };
+
+    splashView.addEventListener("transitionend", (event) => {
+      if (event.propertyName === "opacity") {
+        finalizeSplashDismiss();
+      }
+    }, { once: true });
+
+    // Fallback for browsers that may skip transitionend in edge cases.
+    window.setTimeout(finalizeSplashDismiss, 1500);
   };
 
   splashView.addEventListener("pointerdown", dismissSplash, { once: true });

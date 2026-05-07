@@ -92,6 +92,12 @@ body {
   pointer-events: none;
 }
 
+.splash-closing {
+  opacity: 0;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 .splash-card {
   width: min(440px, 100%);
   /* background: transparent; */
@@ -584,6 +590,15 @@ select:focus {
   outline: none;
   border-color: color-mix(in srgb, var(--primary) 58%, var(--line) 42%);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent 78%);
+}
+
+/* Prevent iOS Safari from auto-zooming focused form controls */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 #saveSettingsBtn {
