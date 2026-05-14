@@ -36,7 +36,16 @@ const levelMessages = {
   3: "오늘은 꽤 먹었네요.",
   4: "이제 그만 먹어도 되지 않을까요?",
   5: "더 먹으면 위험해요!!",
+  6: "살이 찌고 싶으시군요!",
+  7: "에휴.. 포기합니다! 마음껏 드세요!!",
 };
+const MAX_DEFINED_MESSAGE_LEVEL = Math.max(
+  0,
+  ...Object.keys(levelMessages)
+    .map((key) => Number.parseInt(key, 10))
+    .filter((level) => Number.isFinite(level))
+);
+const MAX_AVAILABLE_IMAGE_LEVEL = 5;
 
 const characterPalettes = {
   cat: ["#f6d9bc", "#f4d1b2", "#f3c8a6", "#efbd97", "#e8af87", "#df9f76"],
@@ -56,6 +65,8 @@ const CAT_IMAGE_LEVEL_THRESHOLDS = [
   { minCount: 4, level: 3 },
   { minCount: 6, level: 4 },
   { minCount: 8, level: 5 },
+  { minCount: 10, level: 6 },
+  { minCount: 12, level: 7 },
 ];
 
 const HAMSTER_IMAGE_LEVEL_THRESHOLDS = [
@@ -64,6 +75,8 @@ const HAMSTER_IMAGE_LEVEL_THRESHOLDS = [
   { minCount: 4, level: 3 },
   { minCount: 6, level: 4 },
   { minCount: 8, level: 5 },
+  { minCount: 10, level: 6 },
+  { minCount: 12, level: 7 },
 ];
 
 const POODLE_IMAGE_LEVEL_THRESHOLDS = [
@@ -72,6 +85,8 @@ const POODLE_IMAGE_LEVEL_THRESHOLDS = [
   { minCount: 4, level: 3 },
   { minCount: 6, level: 4 },
   { minCount: 8, level: 5 },
+  { minCount: 10, level: 6 },
+  { minCount: 12, level: 7 },
 ];
 
 const mainView = document.getElementById("mainView");
@@ -81,6 +96,7 @@ const aboutView = document.getElementById("aboutView");
 const historyChart = document.getElementById("historyChart");
 const splashView = document.getElementById("splashView");
 const appShell = document.getElementById("appShell");
+const mainGreetingTitle = document.getElementById("mainGreetingTitle");
 
 const todayLabel = document.getElementById("todayLabel");
 const countLabel = document.getElementById("countLabel");
@@ -293,12 +309,7 @@ function getKSTDateLabel(date = new Date()) {
 
 function getCharacterLevel(count) {
   const safeCount = Math.max(0, Number(count) || 0);
-  if (safeCount === 0) return 0;
-  if (safeCount === 1) return 1;
-  if (safeCount === 2) return 2;
-  if (safeCount === 3) return 3;
-  if (safeCount === 4) return 4;
-  return 5;
+  return clampNumber(safeCount, 0, MAX_DEFINED_MESSAGE_LEVEL);
 }
 
 function loadSnackHistory() {
@@ -352,8 +363,11 @@ function renderMain() {
   const goalMessage =
     count <= state.settings.dailyGoal
       ? `목표(${state.settings.dailyGoal}회) 안에서 기록 중이에요.`
-      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 지방이 꿈틀대요!!!`;
+      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 출렁대는 지방을 보세요!!!`;
 
+  if (mainGreetingTitle) {
+    mainGreetingTitle.textContent = getTimeBasedGreetingMessage();
+  }
   todayLabel.textContent = `${getKSTDateLabel()} · ${characterLabels[type]}`;
   countLabel.textContent = `${count}회`;
   snackMessage.textContent = `${levelMessages[level]}\n${goalMessage}`;
@@ -361,6 +375,30 @@ function renderMain() {
   characterImage.alt = `${characterLabels[type]} 캐릭터`;
   decreaseBtn.disabled = count === 0;
   document.getElementById("increaseBtn").disabled = count >= MAX_DAILY_SNACK_COUNT;
+}
+
+function getTimeBasedGreetingMessage() {
+  const kstHour = getKSTHour();
+  if (kstHour >= 0 && kstHour < 6) {
+    return "지금은 새벽이에요! 어서 주무세요!!";
+  }
+  if (kstHour >= 6 && kstHour < 12) {
+    return "좋은 아침입니다. 상쾌하게 하루를 시작해보아요!";
+  }
+  if (kstHour >= 12 && kstHour < 19) {
+    return "좋은 오후입니다! 조금만 더 힘을 내보아요!";
+  }
+  return "좋은 저녁입니다! 하루를 잘 마무리 하셨나요?";
+}
+
+function getKSTHour() {
+  const now = new Date();
+  const kstHourText = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    hour12: false,
+  }).format(now);
+  return clampNumber(Number.parseInt(kstHourText, 10), 0, 23);
 }
 
 function buildCharacterSvgDataUri(count, rawType) {
@@ -493,11 +531,24 @@ function getPoodleImagePathByCount(count) {
 function getImageLevelByThresholds(count, thresholds) {
   const safeCount = Math.max(0, Number(count) || 0);
   const safeThresholds = Array.isArray(thresholds) ? thresholds : [];
+  if (safeCount >= 8) {
+    return MAX_AVAILABLE_IMAGE_LEVEL;
+  }
+  const maxDefinedImageLevel =
+    safeThresholds.length > 0
+      ? Math.max(
+          1,
+          ...safeThresholds
+            .map((rule) => Number(rule?.level))
+            .filter((level) => Number.isFinite(level))
+        )
+      : 1;
+  const cappedMaxImageLevel = Math.min(maxDefinedImageLevel, MAX_AVAILABLE_IMAGE_LEVEL);
 
   for (let i = safeThresholds.length - 1; i >= 0; i -= 1) {
     const rule = safeThresholds[i];
     if (safeCount >= rule.minCount) {
-      return clampNumber(rule.level, 1, 5);
+      return clampNumber(rule.level, 1, cappedMaxImageLevel);
     }
   }
 

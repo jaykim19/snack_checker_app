@@ -6,6 +6,7 @@
   --card: #fffefc;
   --line: #f0dcc4;
   --text: #473226;
+  --title-text: #5a2f14;
   --muted: #80695a;
   --primary: #f2994a;
   --primary-hover: #eb8c38;
@@ -28,6 +29,7 @@
   --card: #2a221d;
   --line: #4d3c30;
   --text: #f8e6d6;
+  --title-text: #ffd8a8;
   --muted: #d7b89d;
   --primary: #d27d35;
   --primary-hover: #c06f2d;
@@ -55,6 +57,7 @@ body {
   color: var(--text);
   letter-spacing: -0.01em;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 26px);
+  touch-action: pan-x pan-y;
 }
 
 .global-copyright {
@@ -116,7 +119,7 @@ body {
   font-weight: 700;
   opacity: 0;
   animation: splash-item-fade-in 0.68s ease forwards;
-  animation-delay: 0.2s;
+  animation-delay: 0.5s;
 }
 
 .splash-title {
@@ -131,7 +134,8 @@ body {
   background-clip: text;
   opacity: 0;
   animation: splash-item-fade-in 0.72s ease forwards;
-  animation-delay: 0.55s;
+  animation-delay: 0.85s;
+  font-size: 60px
 }
 
 .splash-buddy-row {
@@ -147,6 +151,7 @@ body {
   height: auto;
   filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.1));
   opacity: 0;
+  border-radius: 50%;
   animation:
     splash-item-fade-in 0.7s ease forwards,
     splash-buddy-pop 1.2s ease-in-out infinite;
@@ -170,7 +175,7 @@ body {
   color: var(--muted);
   opacity: 0;
   animation: splash-item-fade-in 0.72s ease forwards;
-  animation-delay: 1.75s;
+  animation-delay: 2s;
 }
 
 .splash-touch-guide {
@@ -183,7 +188,7 @@ body {
   display: flex;
   justify-content: center;
   text-align: center;
-  font-size: clamp(1.22rem, 4.6vw, 1.34rem);
+  font-size: clamp(1.4rem, 4.6vw, 1.34rem);
   font-weight: 800;
   color: color-mix(in srgb, var(--text) 68%, var(--muted) 32%);
   opacity: 0;
@@ -191,8 +196,8 @@ body {
     splash-touch-guide-fade-in 0.72s ease forwards,
     splash-guide-blink 1.1s ease-in-out infinite;
   animation-delay:
-    2.55s,
-    3.28s;
+    2.75s,
+    3.48s;
 }
 
 .app-shell-hidden {
@@ -303,15 +308,16 @@ body {
 
 .app-title {
   font-family: "Baloo 2", "Noto Sans KR", sans-serif;
-  font-size: clamp(2rem, 5.2vw, 2.8rem);
+  font-size: clamp(1.2rem, 4.1vw, 1.2rem);
   font-weight: 800;
-  line-height: 1.04;
-  letter-spacing: 0.01em;
-  background: linear-gradient(135deg, #f9a54f 0%, #f08738 46%, #d96a3f 100%);
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  text-shadow: 0 8px 18px rgba(242, 149, 74, 0.2);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  max-width: 100%;
+  padding-inline: 8px;
+  color: var(--title-text);
+  text-shadow: 0 2px 6px rgba(60, 31, 12, 0.18);
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .subtle {
@@ -380,6 +386,87 @@ body {
   text-align: center;
 }
 
+.about-card {
+  padding-top: 14px;
+}
+
+.about-hero {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--line) 66%);
+  /* background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--primary) 20%, var(--card) 80%) 0%,
+    color-mix(in srgb, var(--chip-bg) 58%, var(--card) 42%) 100%
+  ); */
+}
+
+.about-hero-image {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+}
+
+.about-hero-kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.about-hero-title {
+  margin: 0;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.48;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.about-block {
+  margin-top: 10px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 84%, var(--chip-bg) 16%);
+}
+
+.about-copy {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.62;
+  font-size: 0.95rem;
+}
+
+.about-meta {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text);
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+.about-meta + .about-meta {
+  margin-top: 4px;
+}
+
+.about-meta span:first-child {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.about-meta span:last-child {
+  text-align: right;
+}
+
 .about-notice {
   margin: 16px 0 0;
   text-align: center;
@@ -387,6 +474,7 @@ body {
   font-size: 0.92rem;
   font-weight: 600;
   line-height: 1.58;
+  padding: 8px 10px 0;
 }
 
 .button-row {
@@ -603,7 +691,7 @@ button:disabled {
   left: 0;
   right: 0;
   top: 0;
-  border-top: 2px dashed color-mix(in srgb, var(--primary) 65%, var(--line) 35%);
+  /* border-top: 2px dashed color-mix(in srgb, var(--primary) 65%, var(--line) 35%); */
   opacity: 0.9;
   z-index: 2;
 }
