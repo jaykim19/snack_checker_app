@@ -264,6 +264,7 @@ function setActiveView(name) {
   [mainView, historyView, settingsView, aboutView].forEach((view) => view?.classList.remove("view-active"));
   if (name === "history") {
     historyView.classList.add("view-active");
+    window.scrollTo({ top: 0, behavior: "auto" });
   } else if (name === "settings") {
     settingsView.classList.add("view-active");
   } else if (name === "about") {
