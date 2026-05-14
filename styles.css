@@ -55,7 +55,13 @@
 body {
   margin: 0;
   font-family: var(--font-base);
-  background: var(--bg);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg) 78%, transparent 22%) 0%,
+      color-mix(in srgb, var(--bg) 90%, transparent 10%) 100%
+    ),
+    url("./images/background.png") center / cover no-repeat fixed;
   color: var(--text);
   letter-spacing: -0.01em;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 26px);
