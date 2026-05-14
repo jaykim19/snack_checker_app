@@ -262,16 +262,28 @@ function clearAllHistory() {
 
 function setActiveView(name) {
   [mainView, historyView, settingsView, aboutView].forEach((view) => view?.classList.remove("view-active"));
+  let activeView = mainView;
   if (name === "history") {
     historyView.classList.add("view-active");
-    window.scrollTo({ top: 0, behavior: "auto" });
+    activeView = historyView;
   } else if (name === "settings") {
     settingsView.classList.add("view-active");
+    activeView = settingsView;
   } else if (name === "about") {
     aboutView?.classList.add("view-active");
+    activeView = aboutView;
   } else {
     mainView.classList.add("view-active");
+    activeView = mainView;
   }
+  resetScrollToTop(activeView);
+}
+
+function resetScrollToTop(view) {
+  if (view && typeof view.scrollTop === "number") {
+    view.scrollTop = 0;
+  }
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 }
 
 function resetTodayCount() {
