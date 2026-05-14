@@ -149,7 +149,7 @@ body::before {
 .splash-title {
   margin: 6px 0 16px;
   font-family: var(--font-display);
-  font-size: clamp(2.1rem, 7vw, 2.8rem);
+  font-size: clamp(2.1rem, 7vw, 3rem);
   font-weight: 800;
   line-height: 1;
   background: linear-gradient(135deg, #f9a54f 0%, #f08738 46%, #d96a3f 100%);
@@ -887,6 +887,21 @@ select:focus {
   .period-nav,
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .view-scroll.view-active,
+  .bar-list {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .view-scroll.view-active::-webkit-scrollbar,
+  .bar-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 }
 
