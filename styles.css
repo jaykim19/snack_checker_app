@@ -77,10 +77,10 @@ body {
 
 body::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
-  background: none;
+  background: url("./images/background.png") center / cover no-repeat;
   pointer-events: none;
   transform: translateZ(0);
 }
@@ -243,17 +243,17 @@ body::before {
 
 .app-shell::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 0;
-  background: url("./images/background.png") center / cover no-repeat;
-  opacity: 1;
+  background: color-mix(in srgb, var(--bg) 56%, transparent 44%);
+  opacity: 0.5;
   pointer-events: none;
 }
 
 .app-shell::after {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 1;
   background: linear-gradient(
