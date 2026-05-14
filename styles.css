@@ -873,7 +873,7 @@ select:focus {
 #settingsCharacterPreview {
   display: block;
   margin: 4px auto 10px;
-  max-width: 220px;
+  max-width: 170px;
   width: 100%;
   height: auto;
   border: 1px solid var(--line);
