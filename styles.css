@@ -67,6 +67,7 @@ body {
   );
   position: relative;
   z-index: 0;
+  overflow: hidden;
   color: var(--text);
   letter-spacing: -0.01em;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 26px);
@@ -141,14 +142,14 @@ body::before {
   color: var(--muted);
   font-weight: 700;
   opacity: 0;
-  animation: splash-item-fade-in 0.68s ease forwards;
-  animation-delay: 0.5s;
+  animation: splash-item-fade-in 1s ease forwards;
+  animation-delay: 0.9s;
 }
 
 .splash-title {
   margin: 6px 0 16px;
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 6.3vw, 2.5rem);
+  font-size: clamp(2.1rem, 7vw, 2.8rem);
   font-weight: 800;
   line-height: 1;
   background: linear-gradient(135deg, #f9a54f 0%, #f08738 46%, #d96a3f 100%);
@@ -156,8 +157,8 @@ body::before {
   -webkit-background-clip: text;
   background-clip: text;
   opacity: 0;
-  animation: splash-item-fade-in 0.72s ease forwards;
-  animation-delay: 0.85s;
+  animation: splash-item-fade-in 1.08s ease forwards;
+  animation-delay: 1.45s;
 }
 
 .splash-buddy-row {
@@ -168,26 +169,26 @@ body::before {
 }
 
 .splash-buddy-image {
-  --fade-delay: 0.95s;
+  --fade-delay: 2s;
   width: min(28vw, 110px);
   height: auto;
   filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.1));
   opacity: 0;
   border-radius: 50%;
   animation:
-    splash-item-fade-in 0.7s ease forwards,
+    splash-item-fade-in 1.05s ease forwards,
     splash-buddy-pop 1.2s ease-in-out infinite;
   animation-delay:
     var(--fade-delay),
-    calc(var(--fade-delay) + 0.7s);
+    calc(var(--fade-delay) + 1.05s);
 }
 
 .splash-buddy-image:nth-child(2) {
-  --fade-delay: 1.18s;
+  --fade-delay: 2.45s;
 }
 
 .splash-buddy-image:nth-child(3) {
-  --fade-delay: 1.41s;
+  --fade-delay: 2.9s;
 }
 
 .splash-copy {
@@ -196,8 +197,8 @@ body::before {
   font-weight: 700;
   color: var(--muted);
   opacity: 0;
-  animation: splash-item-fade-in 0.72s ease forwards;
-  animation-delay: 2s;
+  animation: splash-item-fade-in 1.08s ease forwards;
+  animation-delay: 3.65s;
 }
 
 .splash-touch-guide {
@@ -215,11 +216,11 @@ body::before {
   color: color-mix(in srgb, var(--text) 68%, var(--muted) 32%);
   opacity: 0;
   animation:
-    splash-touch-guide-fade-in 0.72s ease forwards,
+    splash-touch-guide-fade-in 1.08s ease forwards,
     splash-guide-blink 1.1s ease-in-out infinite;
   animation-delay:
-    2.75s,
-    3.48s;
+    4.65s,
+    5.73s;
 }
 
 .app-shell-hidden {
@@ -228,9 +229,15 @@ body::before {
 
 .app-shell {
   width: min(720px, 100%);
-  margin: 0 auto;
-  padding: 20px 16px 40px;
-  position: relative;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: max(20px, env(safe-area-inset-top, 0px)) 16px calc(env(safe-area-inset-bottom, 0px) + 40px);
+  position: fixed;
+  inset: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
   isolation: isolate;
   overflow: hidden;
   border-radius: 20px;
@@ -308,10 +315,20 @@ body::before {
 
 .view {
   display: none;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .view-active {
   display: block;
+}
+
+.view-scroll.view-active {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
 
 .app-header h1,
