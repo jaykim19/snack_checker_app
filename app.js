@@ -373,21 +373,37 @@ function renderMain() {
   const count = getTodayCount();
   const level = getCharacterLevel(count);
   const type = state.settings.characterType;
+  const goalToken = `목표(${state.settings.dailyGoal}회)`;
   const goalMessage =
     count <= state.settings.dailyGoal
-      ? `목표(${state.settings.dailyGoal}회) 안에서 기록 중이에요.`
-      : `오늘 목표(${state.settings.dailyGoal}회)를 넘겼어요. 출렁대는 지방을 보세요!!!`;
+      ? `${goalToken} 안에서 기록 중이에요.`
+      : `오늘 ${goalToken}를 넘겼어요. 출렁대는 지방을 보세요!!!`;
 
   if (mainGreetingTitle) {
     mainGreetingTitle.textContent = getTimeBasedGreetingMessage();
   }
   todayLabel.textContent = `${getKSTDateLabel()} · ${characterLabels[type]}`;
   countLabel.textContent = `${count}회`;
-  snackMessage.textContent = `${levelMessages[level]}\n${goalMessage}`;
+  snackMessage.innerHTML = `${escapeHtml(levelMessages[level])}<br>${highlightGoalToken(goalMessage, goalToken)}`;
   characterImage.src = buildCharacterSvgDataUri(count, type);
   characterImage.alt = `${characterLabels[type]} 캐릭터`;
   decreaseBtn.disabled = count === 0;
   document.getElementById("increaseBtn").disabled = count >= MAX_DAILY_SNACK_COUNT;
+}
+
+function highlightGoalToken(message, goalToken) {
+  const escapedMessage = escapeHtml(message);
+  const escapedToken = escapeHtml(goalToken);
+  return escapedMessage.replace(escapedToken, `<span class="goal-token">${escapedToken}</span>`);
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function getTimeBasedGreetingMessage() {

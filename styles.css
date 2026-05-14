@@ -67,7 +67,8 @@ body {
   );
   position: relative;
   z-index: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   color: var(--text);
   letter-spacing: -0.01em;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 26px);
@@ -76,10 +77,10 @@ body {
 
 body::before {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: -1;
-  background: url("./images/background.png") center / cover no-repeat;
+  background: none;
   pointer-events: none;
   transform: translateZ(0);
 }
@@ -229,17 +230,14 @@ body::before {
 
 .app-shell {
   width: min(720px, 100%);
-  height: 100dvh;
-  max-height: 100dvh;
+  min-height: 100dvh;
   padding: max(20px, env(safe-area-inset-top, 0px)) 16px calc(env(safe-area-inset-bottom, 0px) + 40px);
-  position: fixed;
-  inset: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
   /* border-radius: 20px; */
 }
 
@@ -248,8 +246,8 @@ body::before {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: color-mix(in srgb, var(--bg) 56%, transparent 44%);
-  opacity: 0.5;
+  background: url("./images/background.png") center / cover no-repeat;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -317,7 +315,7 @@ body::before {
   display: none;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .view-active {
@@ -325,9 +323,6 @@ body::before {
 }
 
 .view-scroll.view-active {
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
 }
 
@@ -397,7 +392,7 @@ body::before {
   margin: 8px 0 0;
   text-align: center;
   font-size: 0.98rem;
-  font-weight: 600;
+  font-weight: 800;
   letter-spacing: -0.005em;
 }
 
@@ -435,6 +430,11 @@ body::before {
   margin: 10px 0 0;
   color: var(--muted);
   white-space: pre-line;
+}
+
+.goal-token {
+  color: #d93025;
+  font-weight: 700;
 }
 
 .counter-card {
@@ -891,13 +891,11 @@ select:focus {
 }
 
 @media (hover: none) and (pointer: coarse) {
-  .view-scroll.view-active,
   .bar-list {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  .view-scroll.view-active::-webkit-scrollbar,
   .bar-list::-webkit-scrollbar {
     width: 0;
     height: 0;
