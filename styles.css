@@ -240,7 +240,7 @@ body::before {
   flex-direction: column;
   isolation: isolate;
   overflow: hidden;
-  border-radius: 20px;
+  /* border-radius: 20px; */
 }
 
 .app-shell::before {
