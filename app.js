@@ -263,6 +263,8 @@ function clearAllHistory() {
 function setActiveView(name) {
   [mainView, historyView, settingsView, aboutView].forEach((view) => view?.classList.remove("view-active"));
   let activeView = mainView;
+  const shouldLockScroll = name === "settings" || name === "about";
+  document.body.classList.toggle("view-scroll-locked", shouldLockScroll);
   if (name === "history") {
     historyView.classList.add("view-active");
     activeView = historyView;

@@ -75,6 +75,10 @@ body {
   touch-action: pan-x pan-y;
 }
 
+body.view-scroll-locked {
+  overflow-y: hidden;
+}
+
 body::before {
   content: "";
   position: fixed;
