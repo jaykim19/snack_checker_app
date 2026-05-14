@@ -380,15 +380,15 @@ function renderMain() {
 function getTimeBasedGreetingMessage() {
   const kstHour = getKSTHour();
   if (kstHour >= 0 && kstHour < 6) {
-    return "지금은 새벽이에요! 어서 주무세요!!";
+    return "지금은 새벽이에요!\n어서 주무세요!!";
   }
   if (kstHour >= 6 && kstHour < 12) {
-    return "좋은 아침입니다. 상쾌하게 하루를 시작해보아요!";
+    return "좋은 아침입니다.\n상쾌하게 하루를 시작해보아요!";
   }
   if (kstHour >= 12 && kstHour < 19) {
-    return "좋은 오후입니다! 조금만 더 힘을 내보아요!";
+    return "좋은 오후입니다!\n조금만 더 힘을 내보아요!";
   }
-  return "좋은 저녁입니다! 하루를 잘 마무리 하셨나요?";
+  return "좋은 저녁입니다!\n하루를 잘 마무리 하셨나요?";
 }
 
 function getKSTHour() {
