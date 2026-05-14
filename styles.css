@@ -52,20 +52,35 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   font-family: var(--font-base);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--bg) 78%, transparent 22%) 0%,
-      color-mix(in srgb, var(--bg) 90%, transparent 10%) 100%
-    ),
-    url("./images/background.png") center / cover no-repeat fixed;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 78%, transparent 22%) 0%,
+    color-mix(in srgb, var(--bg) 90%, transparent 10%) 100%
+  );
+  position: relative;
+  z-index: 0;
   color: var(--text);
   letter-spacing: -0.01em;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 26px);
   touch-action: pan-x pan-y;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("./images/background.png") center / cover no-repeat;
+  pointer-events: none;
+  transform: translateZ(0);
 }
 
 .global-copyright {
@@ -226,8 +241,7 @@ body {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: url("./images/background.png") right/cover no-repeat;
-  background-attachment: fixed;
+  background: color-mix(in srgb, var(--bg) 56%, transparent 44%);
   opacity: 0.5;
   pointer-events: none;
 }
