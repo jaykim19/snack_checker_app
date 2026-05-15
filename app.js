@@ -4,6 +4,7 @@ const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
 const SPLASH_SEEN_SESSION_KEY = "snack_splash_seen_session";
+const GREETING_REFRESH_INTERVAL_MS = 30 * 1000;
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const KST_DATE_FORMATTER = new Intl.DateTimeFormat("en-CA", {
@@ -28,6 +29,8 @@ const state = {
   history: loadSnackHistory(),
   settings: loadSnackSettings(),
 };
+let greetingAutoRefreshTimerId = null;
+let lastRenderedGreetingMessage = "";
 
 const levelMessages = {
   0: "오늘은 아직 간식 전이에요.",
@@ -120,6 +123,7 @@ const periodButtons = Array.from(document.querySelectorAll(".period-btn"));
 bindEvents();
 applyTheme();
 renderMain();
+startGreetingAutoRefresh();
 runSplashIntro();
 
 function bindEvents() {
@@ -376,13 +380,15 @@ function renderMain() {
   const level = getCharacterLevel(count);
   const type = state.settings.characterType;
   const goalToken = `목표(${state.settings.dailyGoal}회)`;
+  const greetingMessage = getTimeBasedGreetingMessage();
   const goalMessage =
     count <= state.settings.dailyGoal
       ? `${goalToken} 안에서 기록 중이에요.`
       : `오늘 ${goalToken}를 넘겼어요. 출렁대는 지방을 보세요!!!`;
 
+  lastRenderedGreetingMessage = greetingMessage;
   if (mainGreetingTitle) {
-    mainGreetingTitle.textContent = getTimeBasedGreetingMessage();
+    mainGreetingTitle.textContent = greetingMessage;
   }
   todayLabel.textContent = `${getKSTDateLabel()} · ${characterLabels[type]}`;
   countLabel.textContent = `${count}회`;
@@ -391,6 +397,37 @@ function renderMain() {
   characterImage.alt = `${characterLabels[type]} 캐릭터`;
   decreaseBtn.disabled = count === 0;
   document.getElementById("increaseBtn").disabled = count >= MAX_DAILY_SNACK_COUNT;
+}
+
+function startGreetingAutoRefresh() {
+  if (!mainGreetingTitle) {
+    return;
+  }
+  if (greetingAutoRefreshTimerId !== null) {
+    window.clearInterval(greetingAutoRefreshTimerId);
+  }
+  refreshGreetingMessageIfNeeded();
+  greetingAutoRefreshTimerId = window.setInterval(
+    refreshGreetingMessageIfNeeded,
+    GREETING_REFRESH_INTERVAL_MS
+  );
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      refreshGreetingMessageIfNeeded();
+    }
+  });
+}
+
+function refreshGreetingMessageIfNeeded() {
+  if (!mainGreetingTitle) {
+    return;
+  }
+  const nextGreetingMessage = getTimeBasedGreetingMessage();
+  if (nextGreetingMessage === lastRenderedGreetingMessage && mainGreetingTitle.textContent === nextGreetingMessage) {
+    return;
+  }
+  mainGreetingTitle.textContent = nextGreetingMessage;
+  lastRenderedGreetingMessage = nextGreetingMessage;
 }
 
 function highlightGoalToken(message, goalToken) {
