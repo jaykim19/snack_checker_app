@@ -411,15 +411,18 @@ function escapeHtml(value) {
 function getTimeBasedGreetingMessage() {
   const kstHour = getKSTHour();
   if (kstHour >= 0 && kstHour < 6) {
-    return "지금은 새벽이에요!\n어서 주무세요!!";
+    return "지금은 새벽이에요.\n어서 주무세요!!";
+  } else if (kstHour >= 6 && kstHour < 11) {
+    return "좋은 아침입니다.\n상쾌하게 하루를 시작해보아요!!";
+  } else if(kstHour >= 11 && kstHour < 13) {
+    return "점심시간이네요. \n건강한 식단으로 챙겨드세요!!";
+  } else if(kstHour >= 13 && kstHour < 18) {
+    return "좋은 오후입니다!\n조금만 더 힘을 내보아요!!"
+  } else if (kstHour >= 18 && kstHour < 20) {
+    return "고생 많으셨어요. \n오늘 하루도 푹 쉬세요!!";
   }
-  if (kstHour >= 6 && kstHour < 12) {
-    return "좋은 아침입니다.\n상쾌하게 하루를 시작해보아요!";
-  }
-  if (kstHour >= 12 && kstHour < 19) {
-    return "좋은 오후입니다!\n조금만 더 힘을 내보아요!";
-  }
-  return "좋은 저녁입니다!\n하루를 잘 마무리 하셨나요?";
+
+  return "좋은 저녁입니다.\n오늘 하루도 잘 마무리 하세요!!";
 }
 
 function getKSTHour() {
