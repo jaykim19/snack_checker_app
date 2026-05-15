@@ -546,17 +546,17 @@ function buildCharacterSvgDataUri(count, rawType) {
 
 function getHamsterImagePathByCount(count) {
   const imageLevel = getImageLevelByThresholds(count, HAMSTER_IMAGE_LEVEL_THRESHOLDS);
-  return `characters/hamsters/hamster_lv${imageLevel}.svg`;
+  return `images/characters/hamsters/hamster_lv${imageLevel}.svg`;
 }
 
 function getCatImagePathByCount(count) {
   const imageLevel = getImageLevelByThresholds(count, CAT_IMAGE_LEVEL_THRESHOLDS);
-  return `characters/cats/cat_lv${imageLevel}.svg`;
+  return `images/characters/cats/cat_lv${imageLevel}.svg`;
 }
 
 function getPoodleImagePathByCount(count) {
   const imageLevel = getImageLevelByThresholds(count, POODLE_IMAGE_LEVEL_THRESHOLDS);
-  return `characters/puddles/poodle_lv${imageLevel}.svg`;
+  return `images/characters/puddles/poodle_lv${imageLevel}.svg`;
 }
 
 function getImageLevelByThresholds(count, thresholds) {
