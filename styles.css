@@ -888,6 +888,10 @@ select:focus {
 }
 
 @media (max-width: 560px) {
+  .splash-title {
+    font-size: clamp(2.8rem, 11vw, 4.9rem);
+  }
+
   .button-row,
   .quick-nav,
   .period-nav,
