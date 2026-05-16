@@ -523,6 +523,14 @@ body::before {
   text-align: center;
 }
 
+.about-maker-image {
+  display: block;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto;
+  object-fit: cover;
+}
+
 .about-meta {
   margin: 0;
   display: flex;

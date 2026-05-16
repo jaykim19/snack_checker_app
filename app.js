@@ -31,6 +31,7 @@ const state = {
 };
 let greetingAutoRefreshTimerId = null;
 let lastRenderedGreetingMessage = "";
+let lastRenderedDateKey = "";
 
 const levelMessages = {
   0: "오늘은 아직 간식 전이에요.",
@@ -376,7 +377,8 @@ function persistAndRender() {
 }
 
 function renderMain() {
-  const count = getTodayCount();
+  const todayKey = getKSTDateKey();
+  const count = sanitizeSnackCount(state.history[todayKey] || 0);
   const level = getCharacterLevel(count);
   const type = state.settings.characterType;
   const goalToken = `목표(${state.settings.dailyGoal}회)`;
@@ -397,6 +399,7 @@ function renderMain() {
   characterImage.alt = `${characterLabels[type]} 캐릭터`;
   decreaseBtn.disabled = count === 0;
   document.getElementById("increaseBtn").disabled = count >= MAX_DAILY_SNACK_COUNT;
+  lastRenderedDateKey = todayKey;
 }
 
 function startGreetingAutoRefresh() {
@@ -406,16 +409,37 @@ function startGreetingAutoRefresh() {
   if (greetingAutoRefreshTimerId !== null) {
     window.clearInterval(greetingAutoRefreshTimerId);
   }
-  refreshGreetingMessageIfNeeded();
+  refreshMainTimeSensitiveUiIfNeeded();
   greetingAutoRefreshTimerId = window.setInterval(
-    refreshGreetingMessageIfNeeded,
+    refreshMainTimeSensitiveUiIfNeeded,
     GREETING_REFRESH_INTERVAL_MS
   );
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      refreshGreetingMessageIfNeeded();
+      refreshMainTimeSensitiveUiIfNeeded();
     }
   });
+}
+
+function refreshMainTimeSensitiveUiIfNeeded() {
+  const currentDateKey = getKSTDateKey();
+  if (currentDateKey !== lastRenderedDateKey) {
+    initializeTodayHistoryIfMissing(currentDateKey);
+    renderMain();
+    if (historyView.classList.contains("view-active")) {
+      renderHistory();
+    }
+    return;
+  }
+  refreshGreetingMessageIfNeeded();
+}
+
+function initializeTodayHistoryIfMissing(todayKey) {
+  if (Object.prototype.hasOwnProperty.call(state.history, todayKey)) {
+    return;
+  }
+  state.history[todayKey] = 0;
+  saveSnackHistory();
 }
 
 function refreshGreetingMessageIfNeeded() {
