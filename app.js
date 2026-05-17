@@ -17,7 +17,7 @@ const KST_WEEKDAY_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
   weekday: "short",
 });
-const CHARACTER_TYPES = ["cat", "hamster", "dog"];
+const CHARACTER_TYPES = ["cat", "hamster", "dog", "joy"];
 const DEFAULT_SETTINGS = {
   dailyGoal: 3,
   characterType: "cat",
@@ -61,6 +61,7 @@ const characterLabels = {
   cat: "고양이",
   hamster: "햄스터",
   dog: "초코푸들",
+  joy: "조이",
 };
 
 const CAT_IMAGE_LEVEL_THRESHOLDS = [
@@ -83,7 +84,17 @@ const HAMSTER_IMAGE_LEVEL_THRESHOLDS = [
   { minCount: 12, level: 7 },
 ];
 
-const POODLE_IMAGE_LEVEL_THRESHOLDS = [
+const PUDDLE_IMAGE_LEVEL_THRESHOLDS = [
+  { minCount: 0, level: 1 },
+  { minCount: 2, level: 2 },
+  { minCount: 4, level: 3 },
+  { minCount: 6, level: 4 },
+  { minCount: 8, level: 5 },
+  { minCount: 10, level: 6 },
+  { minCount: 12, level: 7 },
+];
+
+const JOY_IMAGE_LEVEL_THRESHOLDS = [
   { minCount: 0, level: 1 },
   { minCount: 2, level: 2 },
   { minCount: 4, level: 3 },
@@ -505,7 +516,10 @@ function buildCharacterSvgDataUri(count, rawType) {
     return getHamsterImagePathByCount(count);
   }
   if (type === "dog") {
-    return getPoodleImagePathByCount(count);
+    return getPuddleImagePathByCount(count);
+  }
+  if (type === "joy") {
+    return getJoyImagePathByCount(count);
   }
   const palette = characterPalettes[type];
   const level = getCharacterLevel(count);
@@ -618,9 +632,14 @@ function getCatImagePathByCount(count) {
   return `images/characters/cats/cat_lv${imageLevel}.svg`;
 }
 
-function getPoodleImagePathByCount(count) {
-  const imageLevel = getImageLevelByThresholds(count, POODLE_IMAGE_LEVEL_THRESHOLDS);
-  return `images/characters/puddles/poodle_lv${imageLevel}.svg`;
+function getPuddleImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, PUDDLE_IMAGE_LEVEL_THRESHOLDS);
+  return `images/characters/puddles/puddle_lv${imageLevel}.svg`;
+}
+
+function getJoyImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, JOY_IMAGE_LEVEL_THRESHOLDS);
+  return `images/characters/girls/girl_lv${imageLevel}.png`;
 }
 
 function getImageLevelByThresholds(count, thresholds) {
