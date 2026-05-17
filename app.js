@@ -4,6 +4,7 @@ const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
 const SPLASH_SEEN_SESSION_KEY = "snack_splash_seen_session";
+const SPLASH_AUTO_DISMISS_DELAY_MS = 10000;
 const GREETING_REFRESH_INTERVAL_MS = 30 * 1000;
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -61,8 +62,8 @@ const characterLabels = {
   cat: "고양이",
   hamster: "햄스터",
   dog: "초코푸들",
-  joy: "조이",
-  kai: "카이",
+  joy: "조이 (여)",
+  kai: "카이 (남)",
 };
 
 const CAT_IMAGE_LEVEL_THRESHOLDS = [
@@ -238,7 +239,11 @@ function runSplashIntro() {
     window.setTimeout(finalizeSplashDismiss, 2000);
   };
 
-  splashView.addEventListener("pointerdown", dismissSplash, { once: true });
+  // 기존: 사용자가 시작 화면을 터치하면 메인 화면으로 전환
+  // splashView.addEventListener("pointerdown", dismissSplash, { once: true });
+
+  // 변경: 시작 화면 요소들이 노출된 뒤 몇 초 후 자동으로 메인 화면으로 전환
+  window.setTimeout(dismissSplash, SPLASH_AUTO_DISMISS_DELAY_MS);
 }
 
 function hasSeenSplashInSession() {
