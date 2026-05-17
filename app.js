@@ -17,7 +17,7 @@ const KST_WEEKDAY_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
   weekday: "short",
 });
-const CHARACTER_TYPES = ["cat", "hamster", "dog", "joy"];
+const CHARACTER_TYPES = ["cat", "hamster", "dog", "joy", "kai"];
 const DEFAULT_SETTINGS = {
   dailyGoal: 3,
   characterType: "cat",
@@ -62,6 +62,7 @@ const characterLabels = {
   hamster: "햄스터",
   dog: "초코푸들",
   joy: "조이",
+  kai: "카이",
 };
 
 const CAT_IMAGE_LEVEL_THRESHOLDS = [
@@ -95,6 +96,16 @@ const PUDDLE_IMAGE_LEVEL_THRESHOLDS = [
 ];
 
 const JOY_IMAGE_LEVEL_THRESHOLDS = [
+  { minCount: 0, level: 1 },
+  { minCount: 2, level: 2 },
+  { minCount: 4, level: 3 },
+  { minCount: 6, level: 4 },
+  { minCount: 8, level: 5 },
+  { minCount: 10, level: 6 },
+  { minCount: 12, level: 7 },
+];
+
+const KAI_IMAGE_LEVEL_THRESHOLDS = [
   { minCount: 0, level: 1 },
   { minCount: 2, level: 2 },
   { minCount: 4, level: 3 },
@@ -521,6 +532,9 @@ function buildCharacterSvgDataUri(count, rawType) {
   if (type === "joy") {
     return getJoyImagePathByCount(count);
   }
+  if (type === "kai") {
+    return getKaiImagePathByCount(count);
+  }
   const palette = characterPalettes[type];
   const level = getCharacterLevel(count);
   const { baseLevel, nextLevel, ratio } = getGrowthStage(count);
@@ -640,6 +654,11 @@ function getPuddleImagePathByCount(count) {
 function getJoyImagePathByCount(count) {
   const imageLevel = getImageLevelByThresholds(count, JOY_IMAGE_LEVEL_THRESHOLDS);
   return `images/characters/girls/girl_lv${imageLevel}.png`;
+}
+
+function getKaiImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, KAI_IMAGE_LEVEL_THRESHOLDS);
+  return `images/characters/boys/boy_lv${imageLevel}.png`;
 }
 
 function getImageLevelByThresholds(count, thresholds) {
