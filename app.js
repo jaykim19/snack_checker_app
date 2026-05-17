@@ -224,7 +224,7 @@ function runSplashIntro() {
     }, { once: true });
 
     // Fallback for browsers that may skip transitionend in edge cases.
-    window.setTimeout(finalizeSplashDismiss, 1500);
+    window.setTimeout(finalizeSplashDismiss, 2000);
   };
 
   splashView.addEventListener("pointerdown", dismissSplash, { once: true });
