@@ -100,7 +100,7 @@
         </section>
       </section>
 
-      <section id="settingsView" class="view view-scroll" aria-label="설정 화면">
+      <section id="settingsView" class="view" aria-label="설정 화면">
         <header class="history-header">
           <button id="backFromSettingsBtn" class="ghost">← 뒤로가기</button>
           <h2>설정</h2>
@@ -117,7 +117,18 @@
           />
 
           <label class="field-label" for="">하루 목표 횟수</label>
-          <input id="dailyGoalInput" type="number" min="0" max="10" />
+          <select id="dailyGoalSelect">
+            <option value="1">1회</option>
+            <option value="2">2회</option>
+            <option value="3">3회</option>
+            <option value="4">4회</option>
+            <option value="5">5회</option>
+            <option value="6">6회</option>
+            <option value="7">7회</option>
+            <option value="8">8회</option>
+            <option value="9">9회</option>
+            <option value="10">10회</option>
+          </select>
 
           <label class="field-label" for="">캐릭터 타입</label>
           <select id="characterTypeSelect">

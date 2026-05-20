@@ -136,7 +136,7 @@ const avgCount = document.getElementById("avgCount");
 const maxDay = document.getElementById("maxDay");
 const minDay = document.getElementById("minDay");
 
-const dailyGoalInput = document.getElementById("dailyGoalInput");
+const dailyGoalSelect = document.getElementById("dailyGoalSelect");
 const characterTypeSelect = document.getElementById("characterTypeSelect");
 const themeSelect = document.getElementById("themeSelect");
 const settingsStatus = document.getElementById("settingsStatus");
@@ -157,8 +157,7 @@ function bindEvents() {
   document.getElementById("infoBtn")?.addEventListener("click", () => {
     setActiveView("about");
   });
-  dailyGoalInput.max = String(MAX_DAILY_GOAL);
-  dailyGoalInput.addEventListener("input", normalizeDailyGoalInputValue);
+  dailyGoalSelect.addEventListener("change", normalizeDailyGoalSelectValue);
 
   document.getElementById("goHistoryBtn").addEventListener("click", () => {
     setActiveView("history");
@@ -263,9 +262,9 @@ function markSplashSeenInSession() {
 }
 
 function saveSettingsFromForm() {
-  normalizeDailyGoalInputValue();
+  normalizeDailyGoalSelectValue();
   state.settings = {
-    dailyGoal: clampNumber(Number(dailyGoalInput.value || 0), 0, MAX_DAILY_GOAL),
+    dailyGoal: clampNumber(Number(dailyGoalSelect.value || 0), 0, MAX_DAILY_GOAL),
     characterType: sanitizeCharacterType(characterTypeSelect.value),
     theme: themeSelect.value === "dark" ? "dark" : "light",
   };
@@ -295,7 +294,7 @@ function clearAllHistory() {
 function setActiveView(name) {
   [mainView, historyView, settingsView, aboutView].forEach((view) => view?.classList.remove("view-active"));
   let activeView = mainView;
-  const shouldLockScroll = name === "about";
+  const shouldLockScroll = name === "about" || name === "settings";
   document.body.classList.toggle("view-scroll-locked", shouldLockScroll);
   if (name === "history") {
     historyView.classList.add("view-active");
@@ -927,16 +926,17 @@ function renderSummary(data) {
 }
 
 function renderSettings() {
-  dailyGoalInput.max = String(MAX_DAILY_GOAL);
-  dailyGoalInput.value = String(state.settings.dailyGoal);
+  dailyGoalSelect.value = String(state.settings.dailyGoal);
+  normalizeDailyGoalSelectValue();
   characterTypeSelect.value = state.settings.characterType;
   themeSelect.value = state.settings.theme;
   updateSettingsCharacterPreview(state.settings.characterType);
   settingsStatus.textContent = "";
 }
 
-function normalizeDailyGoalInputValue() {
-  dailyGoalInput.value = String(clampNumber(Number(dailyGoalInput.value || 0), 0, MAX_DAILY_GOAL));
+function normalizeDailyGoalSelectValue() {
+  const normalizedGoal = clampNumber(Number(dailyGoalSelect.value || 0), 0, MAX_DAILY_GOAL);
+  dailyGoalSelect.value = String(normalizedGoal);
 }
 
 function getKSTDateKeyByOffset(daysAgo) {
