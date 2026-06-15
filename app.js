@@ -18,7 +18,7 @@ const KST_WEEKDAY_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
   weekday: "short",
 });
-const CHARACTER_TYPES = ["cat", "hamster", "dog", "joy", "kai"];
+const CHARACTER_TYPES = ["cat", "hamster", "dog", "joy", "kai", "monkey", "tiger"];
 const DEFAULT_SETTINGS = {
   dailyGoal: 3,
   characterType: "cat",
@@ -64,6 +64,8 @@ const characterLabels = {
   dog: "초코푸들",
   joy: "조이 (여)",
   kai: "카이 (남)",
+  monkey: "원숭이",
+  tiger: "호랑이",
 };
 
 const CAT_IMAGE_LEVEL_THRESHOLDS = [
@@ -107,6 +109,26 @@ const JOY_IMAGE_LEVEL_THRESHOLDS = [
 ];
 
 const KAI_IMAGE_LEVEL_THRESHOLDS = [
+  { minCount: 0, level: 1 },
+  { minCount: 2, level: 2 },
+  { minCount: 4, level: 3 },
+  { minCount: 6, level: 4 },
+  { minCount: 8, level: 5 },
+  { minCount: 10, level: 6 },
+  { minCount: 12, level: 7 },
+];
+
+const MONKEY_IMAGE_LEVEL_THRESHOLDS = [
+  { minCount: 0, level: 1 },
+  { minCount: 2, level: 2 },
+  { minCount: 4, level: 3 },
+  { minCount: 6, level: 4 },
+  { minCount: 8, level: 5 },
+  { minCount: 10, level: 6 },
+  { minCount: 12, level: 7 },
+];
+
+const TIGER_IMAGE_LEVEL_THRESHOLDS = [
   { minCount: 0, level: 1 },
   { minCount: 2, level: 2 },
   { minCount: 4, level: 3 },
@@ -539,6 +561,12 @@ function buildCharacterSvgDataUri(count, rawType) {
   if (type === "kai") {
     return getKaiImagePathByCount(count);
   }
+  if (type === "monkey") {
+    return getMonkeyImagePathByCount(count);
+  }
+  if (type === "tiger") {
+    return getTigerImagePathByCount(count);
+  }
   const palette = characterPalettes[type];
   const level = getCharacterLevel(count);
   const { baseLevel, nextLevel, ratio } = getGrowthStage(count);
@@ -663,6 +691,16 @@ function getJoyImagePathByCount(count) {
 function getKaiImagePathByCount(count) {
   const imageLevel = getImageLevelByThresholds(count, KAI_IMAGE_LEVEL_THRESHOLDS);
   return `images/characters/boys/boy_lv${imageLevel}.png`;
+}
+
+function getMonkeyImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, MONKEY_IMAGE_LEVEL_THRESHOLDS);
+  return `images/characters/monkey/monkey_lv${imageLevel}.png`;
+}
+
+function getTigerImagePathByCount(count) {
+  const imageLevel = getImageLevelByThresholds(count, TIGER_IMAGE_LEVEL_THRESHOLDS);
+  return `images/characters/tiger/tiger_lv${imageLevel}.png`;
 }
 
 function getImageLevelByThresholds(count, thresholds) {
