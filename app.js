@@ -59,13 +59,13 @@ const characterPalettes = {
 };
 
 const characterLabels = {
-  cat: "고양이",
-  hamster: "햄스터",
-  dog: "초코푸들",
+  cat: "냥코",
+  hamster: "햄토",
+  dog: "당근",
   joy: "조이 (여)",
   kai: "카이 (남)",
-  monkey: "원숭이",
-  tiger: "호랑이",
+  monkey: "몽키키",
+  tiger: "타로",
 };
 
 const CAT_IMAGE_LEVEL_THRESHOLDS = [
