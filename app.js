@@ -4,7 +4,7 @@ const PERIOD_DEFAULT = 7;
 const MAX_DAILY_SNACK_COUNT = 20;
 const MAX_DAILY_GOAL = 10;
 const SPLASH_SEEN_SESSION_KEY = "snack_splash_seen_session";
-const SPLASH_AUTO_DISMISS_DELAY_MS = 5500;
+const SPLASH_AUTO_DISMISS_DELAY_MS = 4500;
 const GREETING_REFRESH_INTERVAL_MS = 30 * 1000;
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -257,7 +257,7 @@ function runSplashIntro() {
     }, { once: true });
 
     // Fallback for browsers that may skip transitionend in edge cases.
-    window.setTimeout(finalizeSplashDismiss, 2000);
+    window.setTimeout(finalizeSplashDismiss, 1200);
   };
 
   // 기존: 사용자가 시작 화면을 터치하면 메인 화면으로 전환

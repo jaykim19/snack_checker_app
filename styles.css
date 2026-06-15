@@ -115,7 +115,7 @@ body::before {
     radial-gradient(circle at 14% 12%, color-mix(in srgb, var(--primary) 22%, transparent 78%), transparent 42%),
     radial-gradient(circle at 88% 82%, color-mix(in srgb, #ffcc93 30%, transparent 70%), transparent 40%),
     var(--bg);
-  transition: opacity 1.65s ease, visibility 1.55s ease;
+  transition: opacity 1.2s ease, visibility 0.9s ease;
 }
 
 .splash-hidden {
