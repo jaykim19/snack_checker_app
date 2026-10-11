@@ -1,225 +1,215 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    />
-    <title>Snack Buddy</title>
-    <link rel="icon" type="image/svg+xml" href="./images/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon-16x16.png" />
-    <link rel="icon" href="./favicon.ico" sizes="any" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./images/apple-touch-icon.png" />
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <meta name="theme-color" content="#fff6ea" />
-    <link rel="stylesheet" href="./styles.css?v=20260507" />
-  </head>
-  <body>
-    <section id="splashView" class="splash-view" aria-label="시작 화면">
-      <div class="splash-card">
-        <p class="splash-kicker">나만의 간식 카운터</p>
-        <h1 class="splash-title">Snack Buddy</h1>
-        <div class="splash-buddy-row" aria-hidden="true">
-          <img src="./images/characters/cats/cat_lv1.svg" alt="" class="splash-buddy-image" />
-          <img src="./images/characters/hamsters/hamster_lv1.svg" alt="" class="splash-buddy-image" />
-          <img src="./images/characters/puddles/puddle_lv1.svg" alt="" class="splash-buddy-image" />
-          <!-- <img src="./images/characters/girls/girl_lv1.png" alt="" class="splash-buddy-image" /> -->
-        </div>
-        <!-- <p class="splash-copy">당신의 Buddy와 함께 간식 횟수를 세어보아요!!</p> -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Snack Buddy</title>
+  <link rel="icon" type="image/svg+xml" href="./images/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon-16x16.png" />
+  <link rel="icon" href="./favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./images/apple-touch-icon.png" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#fff6ea" />
+  <link rel="stylesheet" href="./styles.css?v=20260507" />
+</head>
+
+<body>
+  <section id="splashView" class="splash-view" aria-label="시작 화면">
+    <div class="splash-card">
+      <p class="splash-kicker">나만의 간식 카운터</p>
+      <h1 class="splash-title">Snack Buddy</h1>
+      <div class="splash-buddy-row" aria-hidden="true">
+        <img src="./images/characters/cats/cat_lv1.svg" alt="" class="splash-buddy-image" />
+        <img src="./images/characters/hamsters/hamster_lv1.svg" alt="" class="splash-buddy-image" />
+        <img src="./images/characters/puddles/puddle_lv1.svg" alt="" class="splash-buddy-image" />
+        <!-- <img src="./images/characters/girls/girl_lv1.png" alt="" class="splash-buddy-image" /> -->
       </div>
-      <!-- <p class="splash-touch-guide">PRESS START BUTTON</p> -->
-      <!-- <p class="splash-touch-guide">잠시만 기다려 주세요...</p> -->
-      <p class="global-copyright">Copyright © 2026 브릿지듀오 All rights reserved. 🍪</p>
+      <!-- <p class="splash-copy">당신의 Buddy와 함께 간식 횟수를 세어보아요!!</p> -->
+    </div>
+    <!-- <p class="splash-touch-guide">PRESS START BUTTON</p> -->
+    <!-- <p class="splash-touch-guide">잠시만 기다려 주세요...</p> -->
+    <!-- <p class="global-copyright">Copyright © 2026 브릿지듀오 All rights reserved. 🍪</p> -->
+  </section>
+
+  <main id="appShell" class="app-shell app-shell-hidden">
+    <section id="mainView" class="view view-active view-scroll" aria-label="메인 화면">
+      <header class="app-header">
+        <button id="infoBtn" class="info-icon-btn" type="button" aria-label="앱 정보 보기">i</button>
+        <h1 id="mainGreetingTitle" class="app-title">Snack Buddy</h1>
+        <p id="todayLabel" class="subtle"></p>
+      </header>
+
+      <article class="character-card">
+        <img id="characterImage" src="./images/characters/faces/character_0.svg" alt="간식 캐릭터 상태" width="220"
+          height="220" />
+        <p id="snackMessage" class="snack-message"></p>
+      </article>
+
+      <section class="counter-card">
+        <p class="counter-title">오늘의 간식 횟수</p>
+        <p id="countLabel" class="count-value">0회</p>
+        <div class="button-row">
+          <button id="increaseBtn" class="primary">간식 먹음</button>
+          <button id="decreaseBtn" class="secondary">간식 1회 취소</button>
+        </div>
+        <button id="resetBtn" class="danger">오늘 기록 초기화</button>
+      </section>
+
+      <div class="quick-nav">
+        <button id="goHistoryBtn" class="link-btn">히스토리</button>
+        <button id="goSettingsBtn" class="link-btn">설정</button>
+      </div>
     </section>
 
-    <main id="appShell" class="app-shell app-shell-hidden">
-      <section id="mainView" class="view view-active view-scroll" aria-label="메인 화면">
-        <header class="app-header">
-          <button id="infoBtn" class="info-icon-btn" type="button" aria-label="앱 정보 보기">i</button>
-          <h1 id="mainGreetingTitle" class="app-title">Snack Buddy</h1>
-          <p id="todayLabel" class="subtle"></p>
-        </header>
+    <section id="historyView" class="view view-scroll" aria-label="히스토리 화면">
+      <header class="history-header">
+        <button id="backBtn" class="ghost">← 뒤로가기</button>
+        <h2>히스토리</h2>
+      </header>
 
-        <article class="character-card">
-          <img
-            id="characterImage"
-            src="./images/characters/faces/character_0.svg"
-            alt="간식 캐릭터 상태"
-            width="220"
-            height="220"
-          />
-          <p id="snackMessage" class="snack-message"></p>
+      <nav class="period-nav" aria-label="조회 기간 선택">
+        <button data-days="7" class="period-btn period-active">최근 7일</button>
+        <button data-days="14" class="period-btn">최근 14일</button>
+        <button data-days="30" class="period-btn">최근 30일</button>
+      </nav>
+
+      <section class="chart-card">
+        <div id="historyChart" class="bar-chart" aria-label="일별 간식 횟수 그래프"></div>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card">
+          <p class="summary-title">총 간식 횟수</p>
+          <p id="totalCount">0회</p>
         </article>
+        <article class="summary-card">
+          <p class="summary-title">일평균 간식 횟수</p>
+          <p id="avgCount">0.0회</p>
+        </article>
+        <article class="summary-card">
+          <p class="summary-title">가장 많이 먹은 날</p>
+          <p id="maxDay">-</p>
+        </article>
+        <article class="summary-card">
+          <p class="summary-title">가장 적게 먹은 날</p>
+          <p id="minDay">-</p>
+        </article>
+      </section>
+    </section>
 
-        <section class="counter-card">
-          <p class="counter-title">오늘의 간식 횟수</p>
-          <p id="countLabel" class="count-value">0회</p>
-          <div class="button-row">
-            <button id="increaseBtn" class="primary">간식 먹음</button>
-            <button id="decreaseBtn" class="secondary">간식 1회 취소</button>
-          </div>
-          <button id="resetBtn" class="danger">오늘 기록 초기화</button>
-        </section>
+    <section id="settingsView" class="view" aria-label="설정 화면">
+      <header class="history-header">
+        <button id="backFromSettingsBtn" class="ghost">← 뒤로가기</button>
+        <h2>설정</h2>
+      </header>
 
-        <div class="quick-nav">
-          <button id="goHistoryBtn" class="link-btn">히스토리</button>
-          <button id="goSettingsBtn" class="link-btn">설정</button>
+      <section class="counter-card">
+        <p class="field-label">캐릭터 미리보기</p>
+        <img id="settingsCharacterPreview" src="" alt="설정 캐릭터 미리보기" width="180" height="180" />
+
+        <label class="field-label" for="">하루 목표 횟수</label>
+        <select id="dailyGoalSelect">
+          <option value="1">1회</option>
+          <option value="2">2회</option>
+          <option value="3">3회</option>
+          <option value="4">4회</option>
+          <option value="5">5회</option>
+          <option value="6">6회</option>
+          <option value="7">7회</option>
+          <option value="8">8회</option>
+          <option value="9">9회</option>
+          <option value="10">10회</option>
+        </select>
+
+        <label class="field-label" for="">캐릭터 타입</label>
+        <select id="characterTypeSelect">
+          <option value="cat">냥코</option>
+          <option value="hamster">햄토</option>
+          <option value="dog">당근</option>
+          <option value="joy">조이 (여)</option>
+          <option value="kai">카이 (남)</option>
+          <option value="monkey">몽키키</option>
+          <option value="tiger">타로</option>
+        </select>
+
+        <label class="field-label" for="">테마</label>
+        <select id="themeSelect">
+          <option value="light">라이트</option>
+          <option value="dark">다크</option>
+        </select>
+
+        <button id="saveSettingsBtn" class="primary">설정 저장</button>
+        <button id="clearAllBtn" class="danger">전체 기록 초기화</button>
+        <p id="settingsStatus" class="subtle"></p>
+      </section>
+    </section>
+
+    <section id="aboutView" class="view" aria-label="앱 정보 화면">
+      <header class="history-header">
+        <button id="backFromAboutBtn" class="ghost">← 뒤로가기</button>
+        <h2>정보</h2>
+      </header>
+
+      <section class="counter-card about-card">
+        <div class="about-hero">
+          <img src="./images/favicon.svg" alt="" class="about-hero-image" />
+          <p class="about-hero-kicker">Snack Buddy</p>
+          <p class="about-hero-title">간식 습관을 가볍고 즐겁게 체크해요.</p>
         </div>
+
+        <div class="about-block">
+          <p class="field-label">서비스 소개</p>
+          <p class="about-copy">
+            매일 간식 횟수를 기록하고, 귀여운 캐릭터와 함께 <br>오늘의 습관을 확인하는 간식 기록 앱입니다.
+          </p>
+        </div>
+
+        <div class="about-block">
+          <p class="field-label">만든이</p>
+          <img src="./images/branding_image.png" alt="브릿지듀오 팀 이미지" class="about-maker-image" />
+        </div>
+
+        <p class="about-notice">해당 앱의 무단 배포를 금지합니다.</p>
       </section>
+    </section>
+  </main>
 
-      <section id="historyView" class="view view-scroll" aria-label="히스토리 화면">
-        <header class="history-header">
-          <button id="backBtn" class="ghost">← 뒤로가기</button>
-          <h2>히스토리</h2>
-        </header>
+  <script>
+    (() => {
+      // Android/iOS 브라우저의 핀치/더블탭 확대를 추가로 방지한다.
+      let lastTouchEnd = 0;
 
-        <nav class="period-nav" aria-label="조회 기간 선택">
-          <button data-days="7" class="period-btn period-active">최근 7일</button>
-          <button data-days="14" class="period-btn">최근 14일</button>
-          <button data-days="30" class="period-btn">최근 30일</button>
-        </nav>
+      document.addEventListener(
+        "touchstart",
+        (event) => {
+          if (event.touches.length > 1) {
+            event.preventDefault();
+          }
+        },
+        { passive: false }
+      );
 
-        <section class="chart-card">
-          <div id="historyChart" class="bar-chart" aria-label="일별 간식 횟수 그래프"></div>
-        </section>
+      document.addEventListener(
+        "touchend",
+        (event) => {
+          const now = Date.now();
+          if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+          }
+          lastTouchEnd = now;
+        },
+        { passive: false }
+      );
 
-        <section class="summary-grid">
-          <article class="summary-card">
-            <p class="summary-title">총 간식 횟수</p>
-            <p id="totalCount">0회</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-title">일평균 간식 횟수</p>
-            <p id="avgCount">0.0회</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-title">가장 많이 먹은 날</p>
-            <p id="maxDay">-</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-title">가장 적게 먹은 날</p>
-            <p id="minDay">-</p>
-          </article>
-        </section>
-      </section>
+      document.addEventListener("gesturestart", (event) => event.preventDefault(), { passive: false });
+      document.addEventListener("gesturechange", (event) => event.preventDefault(), { passive: false });
+      document.addEventListener("gestureend", (event) => event.preventDefault(), { passive: false });
+    })();
+  </script>
+  <script src="./app.js?v=20260507"></script>
+</body>
 
-      <section id="settingsView" class="view" aria-label="설정 화면">
-        <header class="history-header">
-          <button id="backFromSettingsBtn" class="ghost">← 뒤로가기</button>
-          <h2>설정</h2>
-        </header>
-
-        <section class="counter-card">
-          <p class="field-label">캐릭터 미리보기</p>
-          <img
-            id="settingsCharacterPreview"
-            src=""
-            alt="설정 캐릭터 미리보기"
-            width="180"
-            height="180"
-          />
-
-          <label class="field-label" for="">하루 목표 횟수</label>
-          <select id="dailyGoalSelect">
-            <option value="1">1회</option>
-            <option value="2">2회</option>
-            <option value="3">3회</option>
-            <option value="4">4회</option>
-            <option value="5">5회</option>
-            <option value="6">6회</option>
-            <option value="7">7회</option>
-            <option value="8">8회</option>
-            <option value="9">9회</option>
-            <option value="10">10회</option>
-          </select>
-
-          <label class="field-label" for="">캐릭터 타입</label>
-          <select id="characterTypeSelect">
-            <option value="cat">냥코</option>
-            <option value="hamster">햄토</option>
-            <option value="dog">당근</option>
-            <option value="joy">조이 (여)</option>
-            <option value="kai">카이 (남)</option>
-            <option value="monkey">몽키키</option>
-            <option value="tiger">타로</option>
-          </select>
-
-          <label class="field-label" for="">테마</label>
-          <select id="themeSelect">
-            <option value="light">라이트</option>
-            <option value="dark">다크</option>
-          </select>
-
-          <button id="saveSettingsBtn" class="primary">설정 저장</button>
-          <button id="clearAllBtn" class="danger">전체 기록 초기화</button>
-          <p id="settingsStatus" class="subtle"></p>
-        </section>
-      </section>
-
-      <section id="aboutView" class="view" aria-label="앱 정보 화면">
-        <header class="history-header">
-          <button id="backFromAboutBtn" class="ghost">← 뒤로가기</button>
-          <h2>정보</h2>
-        </header>
-
-        <section class="counter-card about-card">
-          <div class="about-hero">
-            <img src="./images/favicon.svg" alt="" class="about-hero-image" />
-            <p class="about-hero-kicker">Snack Buddy</p>
-            <p class="about-hero-title">간식 습관을 가볍고 즐겁게 체크해요.</p>
-          </div>
-
-          <div class="about-block">
-            <p class="field-label">서비스 소개</p>
-            <p class="about-copy">
-              매일 간식 횟수를 기록하고, 귀여운 캐릭터와 함께 <br>오늘의 습관을 확인하는 간식 기록 앱입니다.
-            </p>
-          </div>
-
-          <div class="about-block">
-            <p class="field-label">만든이</p>
-            <img src="./images/branding_image.png" alt="브릿지듀오 팀 이미지" class="about-maker-image" />
-          </div>
-
-          <p class="about-notice">해당 앱의 무단 배포를 금지합니다.</p>
-        </section>
-      </section>
-    </main>
-
-    <script>
-      (() => {
-        // Android/iOS 브라우저의 핀치/더블탭 확대를 추가로 방지한다.
-        let lastTouchEnd = 0;
-
-        document.addEventListener(
-          "touchstart",
-          (event) => {
-            if (event.touches.length > 1) {
-              event.preventDefault();
-            }
-          },
-          { passive: false }
-        );
-
-        document.addEventListener(
-          "touchend",
-          (event) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-              event.preventDefault();
-            }
-            lastTouchEnd = now;
-          },
-          { passive: false }
-        );
-
-        document.addEventListener("gesturestart", (event) => event.preventDefault(), { passive: false });
-        document.addEventListener("gesturechange", (event) => event.preventDefault(), { passive: false });
-        document.addEventListener("gestureend", (event) => event.preventDefault(), { passive: false });
-      })();
-    </script>
-    <script src="./app.js?v=20260507"></script>
-  </body>
 </html>
